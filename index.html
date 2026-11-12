@@ -1148,7 +1148,7 @@ svg.radar { flex: 1; min-height: 0; width: 100%; display: block; }
 
 /* ---- Settings: a box over whatever is on screen ---- */
 .setwrap { position: absolute; inset: 0; z-index: 90; background: #14324aa6; }
-.panel.setpanel { left: 290px; top: 96px; width: 700px; height: 528px; display: flex; flex-direction: column; gap: 14px; padding: 18px 24px 20px; }
+.panel.setpanel { left: 290px; top: 64px; width: 700px; height: 592px; display: flex; flex-direction: column; gap: 14px; padding: 18px 24px 20px; }
 .setpanel h3 { margin: 0; font: 400 48px/1 var(--f-title); color: var(--text); }
 .setrow { display: flex; align-items: flex-start; gap: 16px; padding-top: 12px; border-top: 2px solid #b9c6e6; }
 .setname { flex: none; width: 128px; padding-top: 8px; font: 400 30px/1 var(--f-title); color: var(--text); }
@@ -3039,6 +3039,106 @@ const BOT_ROSTER = [{"id":55,"name":"Bot56","moves":"blockHeavy","chainStyle":"l
   const sfxRinging = ids => { try { return SND.ctx ? Math.max(0, ...SND.live.filter(v => ids.includes(v.id)).map(v => (v.end - SND.ctx.currentTime) * 1000)) : 0; } catch (e) { return 0; } };
   // a click whose result makes its own sound at once (a chain laid down, dice rolled): no button click on top of it
   const quietClick = () => { if (SND.click) SND.click.sounded = true; };
+  /* ---------------- music ---------------- */
+  // Five tracks chosen by the owner on the Music Board (sources and licences: music/LICENSES.md), in art/music/ as MP3:
+  //   menu (start page, character screens), battle (a match), final (from the moment either fighter is down to the Last bar),
+  //   win and lose (once, when the match ends). Music has its own switch and volume, apart from the sound effects.
+  // Played through Web Audio when the file can be read (a website: seamless loops); opened from disk, it falls back to a plain
+  // audio element. Browsers allow no music before the first click or key: what should be playing starts then.
+  // Like the sounds, it never stops the game, and stays silent at speed 0 (the quick self-play test).
+  const MUSIC = { menu: { loop: true }, battle: { loop: true }, final: { loop: true }, win: { loop: false }, lose: { loop: false } };
+  const MUS = { on: true, vol: 40, want: null, cur: null, ctx: null, gain: null, buf: {}, loading: {}, woke: false, n: 0, log: null };
+  try {
+    if (localStorage.getItem('break-music-on') === '0') MUS.on = false;
+    const v = localStorage.getItem('break-music-volume'), n = Number(v);
+    if (v !== null && v !== '' && n >= 0 && n <= 100) MUS.vol = Math.round(n);
+  } catch (e) { /* no storage: the defaults */ }
+  const musGain = () => Math.pow(MUS.vol / 100, 1.6);
+  const saveMusic = () => { try { localStorage.setItem('break-music-on', MUS.on ? '1' : '0'); localStorage.setItem('break-music-volume', String(MUS.vol)); } catch (e) { /* not remembered */ } };
+  const musicUrl = k => `art/music/${k}.mp3`;
+  function musicCtx() {
+    if (MUS.ctx) return MUS.ctx;
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null;
+      MUS.ctx = new AC(); MUS.gain = MUS.ctx.createGain(); MUS.gain.gain.value = musGain(); MUS.gain.connect(MUS.ctx.destination);
+      return MUS.ctx;
+    } catch (e) { return null; }
+  }
+  // the decoded track (Web Audio), or 'html' when the file cannot be read that way (opened from disk)
+  function musicLoad(k) {
+    if (MUS.buf[k]) return Promise.resolve(MUS.buf[k]);
+    if (MUS.loading[k]) return MUS.loading[k];
+    const ctx = musicCtx();
+    MUS.loading[k] = (ctx && location.protocol !== 'file:' ? fetch(musicUrl(k)).then(r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+      .then(b => new Promise((ok, no) => ctx.decodeAudioData(b, ok, no))) : Promise.reject(new Error('file')))
+      .catch(() => 'html').then(b => { MUS.buf[k] = b; return b; });
+    return MUS.loading[k];
+  }
+  // one playing track: fades in, and stop(ms) fades it out
+  function musicVoice(k, buf, fadeIn) {
+    const loop = MUSIC[k].loop, ctx = MUS.ctx;
+    if (buf !== 'html' && ctx) {
+      const src = ctx.createBufferSource(), g = ctx.createGain(), t = ctx.currentTime;
+      src.buffer = buf; src.loop = loop; src.connect(g); g.connect(MUS.gain);
+      g.gain.setValueAtTime(fadeIn ? 0 : 1, t); if (fadeIn) g.gain.linearRampToValueAtTime(1, t + fadeIn / 1000);
+      src.start(t);
+      const v = { k, kind: 'buffer', stop(ms = 0) { try { const n = ctx.currentTime; g.gain.cancelScheduledValues(n); g.gain.setValueAtTime(g.gain.value, n); g.gain.linearRampToValueAtTime(0, n + ms / 1000 + .01); src.stop(n + ms / 1000 + .05); } catch (e) { /* already stopped */ } } };
+      src.onended = () => { if (MUS.cur === v) MUS.cur = null; };
+      return v;
+    }
+    const a = new Audio(musicUrl(k)); a.loop = loop; let lvl = fadeIn ? 0 : 1, timer = null;
+    const apply = () => { a.volume = Math.max(0, Math.min(1, lvl * musGain())); };
+    const ramp = (to, ms, done) => { clearInterval(timer); const from = lvl, t0 = performance.now(); timer = setInterval(() => { const f = Math.min(1, (performance.now() - t0) / Math.max(1, ms)); lvl = from + (to - from) * f; apply(); if (f >= 1) { clearInterval(timer); if (done) done(); } }, 30); };
+    apply(); a.play().catch(() => {}); if (fadeIn) ramp(1, fadeIn);
+    const v = { k, kind: 'html', el: a, apply, stop(ms = 0) { ramp(0, ms, () => { a.pause(); a.removeAttribute('src'); }); } };
+    a.onended = () => { if (MUS.cur === v) MUS.cur = null; };
+    return v;
+  }
+  const musicCan = () => MUS.on && speed > 0 && MUS.woke;
+  // what should be playing now: a track key, or null for silence. o.fade: ms to fade between them; o.delay: ms before it starts
+  function music(k, o = {}) {
+    try {
+      if (MUS.log) MUS.log.push(k);
+      const same = k && k === MUS.want && MUS.cur && MUS.cur.k === k && MUSIC[k].loop;
+      MUS.want = k;
+      if (same) return;      // already playing (the menu stays on between the start page and the character screens)
+      const fade = o.fade === undefined ? 600 : o.fade, old = MUS.cur, ask = ++MUS.n;
+      if (old) { old.stop(fade); MUS.cur = null; }
+      if (!k || !musicCan()) return;
+      musicLoad(k).then(buf => setTimeout(() => {
+        if (ask !== MUS.n || MUS.want !== k || !musicCan()) return;      // something else was asked for meanwhile
+        const ctx = MUS.ctx; if (ctx && ctx.state === 'suspended' && !document.hidden) ctx.resume().catch(() => {});
+        MUS.cur = musicVoice(k, buf, MUSIC[k].loop ? fade : 0);
+      }, Math.max(0, o.delay || 0))).catch(() => {});
+    } catch (e) { /* no music, the game goes on */ }
+  }
+  // the first click or key anywhere: music is allowed from now on, and what should be playing starts
+  function musicWake() {
+    if (MUS.woke) return; MUS.woke = true;
+    musicCtx(); if (MUS.ctx && MUS.ctx.state === 'suspended') MUS.ctx.resume().catch(() => {});
+    if (MUS.want && MUSIC[MUS.want].loop) { const k = MUS.want; MUS.want = null; music(k, { fade: 900 }); }
+  }
+  ['pointerdown', 'keydown'].forEach(ev => document.addEventListener(ev, musicWake, { capture: true }));
+  // a hidden tab is quiet; back in view, the music carries on
+  document.addEventListener('visibilitychange', () => {
+    try {
+      if (MUS.ctx) { if (document.hidden) MUS.ctx.suspend().catch(() => {}); else MUS.ctx.resume().catch(() => {}); }
+      if (MUS.cur && MUS.cur.kind === 'html') { if (document.hidden) MUS.cur.el.pause(); else MUS.cur.el.play().catch(() => {}); }
+    } catch (e) { /* nothing */ }
+  });
+  function setMusic(on) {
+    MUS.on = !!on; saveMusic();
+    const k = MUS.want;
+    if (MUS.on) { if (k && MUSIC[k].loop) { MUS.want = null; music(k, { fade: 600 }); } }
+    else if (MUS.cur) { MUS.cur.stop(150); MUS.cur = null; }
+    syncSettings();
+  }
+  function setMusicVolume(v) {
+    MUS.vol = Math.max(0, Math.min(100, Number(v) || 0));
+    try { if (MUS.gain) MUS.gain.gain.setTargetAtTime(musGain(), MUS.ctx.currentTime, .02); if (MUS.cur && MUS.cur.kind === 'html') MUS.cur.apply(); } catch (e) { /* no audio */ }
+    saveMusic(); syncSettings();
+  }
+
   // a short beat, so two sounds that follow each other are heard one after the other
   async function beat() { const ms = G && G.beat ? G.beat - performance.now() : 0; if (G) G.beat = 0; if (ms > 0 && speed > 0) await sleep(ms); }
 
@@ -3162,6 +3262,7 @@ const BOT_ROSTER = [{"id":55,"name":"Bot56","moves":"blockHeavy","chainStyle":"l
     const bot = pickBot();                         // a tournament bot, by the difficulty setting
     G = { chars: [mine, theirs], bot, level, events: [], log: [], mode: 'duel', picks: [], extra: null, lastMoves: [null, null], token: {}, formNow: [null, null] };
     const token = G.token;
+    music('battle', { fade: 800 }); G.finalMusic = false;
     G.match = new ArenaMatch({ ask, maxRounds: 60, characters: [mine, theirs] });
     buildArena();
     one('#log').innerHTML = '';
@@ -3214,6 +3315,8 @@ const BOT_ROSTER = [{"id":55,"name":"Bot56","moves":"blockHeavy","chainStyle":"l
   // a hit that is acted out: the bars wait for the strike to land (they used to move as soon as the sentence appeared)
   const HIT = /^Player 1 played \w+, Player 2 played \w+\. Player \d wins|^Player 1 and Player 2 both played|^Player \d attacks, spending|is complete: it leaves the table/;
   const release = () => { if (G.held) { G.held = null; renderGauges(); } };
+  // the final-stage music: from the moment either fighter is down to the Last bar (their Shield is 0), until the match ends
+  function finalMusic() { if (G && !G.finalMusic && G.view && G.view.bars.some(b => b.shield === 0)) { G.finalMusic = true; music('final', { fade: 1500 }); } }
   async function playEvents() {
     while (G.events.length) {
       if (!one('#arena')) { G.events.length = 0; return; }      // the match was left (New match): nothing to show
@@ -3225,13 +3328,13 @@ const BOT_ROSTER = [{"id":55,"name":"Bot56","moves":"blockHeavy","chainStyle":"l
       // a Killing Blow guess: the scene shows the result first; only then do the log, the bars and the text below tell it
       const kb = !G.skip && !G.kbHurry && speed > 0 && e.raw.match(/^Player (\d) names (\w+): (it is|wrong)/);
       if (kb) {
-        await kbReveal(kb[1] - 1, kb[2], kb[3] !== 'wrong', e.snap, () => { addLog(text); setMode('kb'); G.view = e.snap; renderWatching(text); });
+        await kbReveal(kb[1] - 1, kb[2], kb[3] !== 'wrong', e.snap, () => { addLog(text); setMode('kb'); G.view = e.snap; finalMusic(); renderWatching(text); });
         continue;
       }
       addLog(text);
       const modeWas = G.mode;
       if ((major || ROLLS.test(e.raw)) && !fm) setMode(modeForText(e.raw));      // (a change of form keeps the screen as it is)
-      G.view = e.snap;
+      G.view = e.snap; finalMusic();
       G.held = major && prev && speed > 0 && !G.skip && HIT.test(e.raw) ? prev : null;      // the gauges keep the old numbers until the hit lands
       renderWatching(text);
       try { eventSounds(e.raw, prev, e.snap, major, modeWas !== G.mode && modeWas !== 'kb' && G.mode !== 'kb'); } catch (err) { /* a sound never stops the game */ }      // (into and out of the Killing Blow: its own sounds lead)
@@ -4506,6 +4609,9 @@ const BOT_ROSTER = [{"id":55,"name":"Bot56","moves":"blockHeavy","chainStyle":"l
     press('#setSound', SND.on); one('#setSound b').textContent = SND.on ? 'On' : 'Off';
     press('#setHints', TIPS.on); one('#setHints b').textContent = TIPS.on ? 'On' : 'Off';
     one('#setVolNum').textContent = SND.vol; one('#setVolRow').classList.toggle('off', !SND.on);
+    press('#setMusic', MUS.on); one('#setMusic b').textContent = MUS.on ? 'On' : 'Off';
+    const mv = one('#setMusVolume'); mv.value = MUS.vol; mv.disabled = !MUS.on;
+    one('#setMusVolNum').textContent = MUS.vol; one('#setMusVolRow').classList.toggle('off', !MUS.on);
     all('[data-level]', box).forEach(b => b.setAttribute('aria-pressed', String(b.dataset.level === level)));
   }
   // The Settings box lies over whatever is on screen (the start page, the character screen, a match): closing it leaves
@@ -4518,6 +4624,9 @@ const BOT_ROSTER = [{"id":55,"name":"Bot56","moves":"blockHeavy","chainStyle":"l
       <div class="setrow"><span class="setname">Sound</span><div class="setctl">
         <button type="button" class="btn mid settog" id="setSound" aria-label="Sound"><b></b></button>
         <label class="setvol" id="setVolRow"><span>Volume</span><input type="range" id="setVolume" min="0" max="100" step="5" aria-label="Sound volume"><b id="setVolNum"></b></label></div></div>
+      <div class="setrow"><span class="setname">Music</span><div class="setctl">
+        <button type="button" class="btn mid settog" id="setMusic" aria-label="Music"><b></b></button>
+        <label class="setvol" id="setMusVolRow"><span>Volume</span><input type="range" id="setMusVolume" min="0" max="100" step="5" aria-label="Music volume"><b id="setMusVolNum"></b></label></div></div>
       <div class="setrow"><span class="setname">Computer</span><div class="setctl col">
         <div class="setseg" role="group" aria-label="Computer difficulty">${LEVELS.map(([k, n, t]) => `<button type="button" class="btn mid" data-level="${k}"><b>${n}</b><small>${t}</small></button>`).join('')}</div>
         <p class="setnote">How strong the computer opponent is. It applies from the next match.</p></div></div>
@@ -4532,6 +4641,8 @@ const BOT_ROSTER = [{"id":55,"name":"Bot56","moves":"blockHeavy","chainStyle":"l
     one('#setSound').onclick = () => { quietClick(); setSound(!SND.on); };
     one('#setVolume').oninput = e => setVolume(e.target.value);
     one('#setVolume').onchange = () => { audioOn(); sfx('button', { gap: 150 }); };      // a click at the new volume
+    one('#setMusic').onclick = () => setMusic(!MUS.on);
+    one('#setMusVolume').oninput = e => setMusicVolume(e.target.value);
     one('#setHints').onclick = () => setHints(!TIPS.on);
     all('[data-level]', box).forEach(b => b.onclick = () => setLevel(b.dataset.level));
     one('#setDone').onclick = () => closeSettings();
@@ -4549,7 +4660,9 @@ const BOT_ROSTER = [{"id":55,"name":"Bot56","moves":"blockHeavy","chainStyle":"l
     renderGauges();
     one('#turn').style.display = 'none';
     const title = w === null ? 'No winner' : w === 0 ? 'You win!' : 'You lose';
-    announce(w === null ? 'no-winner' : w === 0 ? 'win' : 'lose', { delay: Math.min(700, Math.max(sfxRinging(['kb-right', 'five-jokers', 'deck-out']) - 300, (G.minorAt || 0) - performance.now())) });      // after the last big sound, not on top of it
+    const endAt = Math.min(700, Math.max(sfxRinging(['kb-right', 'five-jokers', 'deck-out']) - 300, (G.minorAt || 0) - performance.now()));
+    announce(w === null ? 'no-winner' : w === 0 ? 'win' : 'lose', { delay: endAt });      // after the last big sound, not on top of it
+    music(w === null ? null : w === 0 ? 'win' : 'lose', { fade: 500, delay: Math.max(0, endAt) + 700 });      // the battle music fades; the win or lose sting follows the result sound
     setPrompt('Match over', `${title} — ${tell(r.endReason || '')}.`);
     const weak = G.match.pl.map(p => p.weak);
     if (w !== null) G.fighters[w].pose('attacking', 1000 * speed);
@@ -4660,7 +4773,7 @@ const BOT_ROSTER = [{"id":55,"name":"Bot56","moves":"blockHeavy","chainStyle":"l
   // mode: 'pick' (Play: your earlier picks are still selected) or 'browse'
   async function showSelect(mode = 'pick') {
     const my = ++nav; screen = 'select';
-    leaveMatch();
+    leaveMatch(); music('menu');
     await Promise.all(ROSTER.map(loadArt));
     if (nav !== my) return;
     sel.mode = mode; sel.guideRow = null;
@@ -4773,7 +4886,7 @@ const BOT_ROSTER = [{"id":55,"name":"Bot56","moves":"blockHeavy","chainStyle":"l
   const startChoices = () => all('#start .smenu .sbtn');
   async function showStart() {
     const my = ++nav; screen = 'start';
-    leaveMatch();
+    leaveMatch(); music('menu');
     await Promise.all(START_ART.map(loadArt));
     if (nav !== my) return;
     const frame = one('#frame');
@@ -4784,7 +4897,7 @@ const BOT_ROSTER = [{"id":55,"name":"Bot56","moves":"blockHeavy","chainStyle":"l
       <div class="smenu" role="group" aria-label="Start page">
         <button type="button" class="btn main mid sbtn" data-go="play"><b>Play</b><small>Choose the fighters and fight</small></button>
         <button type="button" class="btn mid sbtn" data-go="chars"><b>Characters</b><small>A guide to each fighter</small></button>
-        <button type="button" class="btn mid sbtn" data-go="settings"><b>Settings</b><small>Sound, volume and tips</small></button>
+        <button type="button" class="btn mid sbtn" data-go="settings"><b>Settings</b><small>Sound, music and tips</small></button>
       </div>
       <div class="skeys"><kbd>↑</kbd><kbd>↓</kbd> choose <kbd>Enter</kbd> select</div>
     </div>`;
@@ -4850,9 +4963,11 @@ const BOT_ROSTER = [{"id":55,"name":"Bot56","moves":"blockHeavy","chainStyle":"l
   }
   // for checking in the browser console: ARENA.autoplay() lets a bot make your decisions too (a quick test of every screen)
   window.ARENA = {
+    // the music (for checking): what should play, what is playing and how; record() starts a list of every music() request
+    music: { get want() { return MUS.want; }, get playing() { return MUS.cur ? MUS.cur.k : null; }, get how() { return MUS.cur ? MUS.cur.kind : null; }, get woke() { return MUS.woke; }, record() { MUS.log = []; return MUS.log; }, wake: musicWake },
     get game() { return G; }, get pending() { return pending; }, get screen() { return screen; }, get select() { return { mode: sel.mode, mine: pickState.mine, theirs: pickState.theirs }; },
     // the settings (for checking): what is set now, and the same setters the Settings box and the top bar use
-    settings: { get level() { return level; }, get hints() { return TIPS.on; }, get sound() { return SND.on; }, get volume() { return SND.vol; }, get gain() { return volGain(); }, setLevel, setHints, setSound, setVolume, open: () => openSettings(), close: closeSettings, pickBot }, snapshot, submit, render,
+    settings: { get level() { return level; }, get hints() { return TIPS.on; }, get sound() { return SND.on; }, get volume() { return SND.vol; }, get gain() { return volGain(); }, get music() { return MUS.on; }, get musicVolume() { return MUS.vol; }, setLevel, setHints, setSound, setVolume, setMusic, setMusicVolume, open: () => openSettings(), close: closeSettings, pickBot }, snapshot, submit, render,
     setSpeed(x) { speed = x; },
     // for checking the sounds: ARENA.sound.record() starts a list of every sound that starts (id, time), ARENA.sound.log reads it
     sound: { sfx, announce, stop: sfxStop, record(on = true) { SND.log = on ? [] : null; }, get log() { return SND.log; }, get on() { return SND.on; }, get volume() { return SND.vol; }, get ctx() { return SND.ctx; }, ids: HAVE_SFX ? Object.keys(SFX.SOUNDS) : [] },
