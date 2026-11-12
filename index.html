@@ -894,6 +894,127 @@ button.card { transition: transform .12s ease-out; }
 .top .vol.off input { cursor: default; }
 #sound[aria-pressed="false"] { opacity: .75; }
 
+/* ================= first-play clarity ================= */
+/* ---- the goal, beside the moment track: what you are trying to do right now (hover, focus or tap: the whole path to a win) ---- */
+.goal { position: absolute; left: 850px; top: 6px; width: 408px; height: 38px; z-index: 30; display: flex; align-items: center; gap: 8px; padding: 0 6px 0 4px; background: #14324aeb; color: #fff8e0; box-shadow: var(--notch-3); cursor: help; }
+.goal > b { flex: none; padding: 4px 7px 5px; font: 400 21px/1 var(--f-label); color: #14324a; background: linear-gradient(#ffe27a, #ffb52e); }
+.goal .gline { flex: 1; min-width: 0; max-height: 38px; overflow: hidden; font: 800 16px/1.15 var(--f-text); text-wrap: balance; }
+.goal .gmore { flex: none; width: 22px; height: 22px; display: grid; place-items: center; border-radius: 50%; font: 400 19px/1 var(--f-label); color: #14324a; background: #fff8e0; }
+.goal:focus-visible { outline: 3px dashed #ffbe1f; outline-offset: 3px; }
+.goal .gtip { left: auto; right: 0; top: 46px; bottom: auto; width: 480px; padding: 10px 12px 8px; cursor: default; }
+.goal:hover .gtip, .goal:focus .gtip, .goal:focus-within .gtip { display: block; }
+.goal .gtip > b { margin-bottom: 6px; }
+.goal .gtip p { margin: 0 0 6px; padding: 3px 6px 4px 8px; font: 700 14px/1.25 var(--f-text); border-left: 5px solid transparent; }
+.goal .gtip p strong { display: block; font: 400 19px/1.1 var(--f-label); letter-spacing: .02em; }
+.goal .gtip p.done { opacity: .7; }
+.goal .gtip p.now { border-left-color: #ffbe1f; background: #ffffff26; }
+.goal .gtip p.other { margin: 0; padding-top: 6px; border-top: 2px dotted currentColor; opacity: .9; }
+.goal[data-step="3"] > b { background: linear-gradient(#ffd76a, #ff8a3a); }
+
+/* ---- the deck: always on screen as a number (amber when low, red when the next draw is the last card) ---- */
+.ico.deckchip { width: auto; min-width: 54px; padding: 0 6px 0 4px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+.ico.deckchip > b { font: 400 25px/1 var(--f-label); color: #14324a; }
+.ico.deckchip.low { background: #ffbe1f; }
+.ico.deckchip.last { background: #a3201a; animation: decklast .5s ease-in-out infinite alternate; }
+.ico.deckchip.last > b { color: #fff; }
+@keyframes decklast { from { box-shadow: var(--notch-3), 0 0 0 4px #e8443a; } to { box-shadow: var(--notch-3), 0 0 0 4px #ffbe1f; } }
+.ico.deckchip.gain { background: #7fe08a; animation: landed .25s ease-out; }
+.ico.deckchip.gain::after { content: attr(data-gain); position: absolute; right: -6px; top: -26px; z-index: 5; font: 400 30px/1 var(--f-label); color: #b6f08a; text-shadow: 2px 2px 0 var(--ink), -1px -1px 0 var(--ink), 1px -1px 0 var(--ink), -1px 1px 0 var(--ink); animation: gainup 1.3s ease-out forwards; pointer-events: none; }
+@keyframes gainup { 0% { opacity: 0; transform: translateY(10px); } 15% { opacity: 1; transform: translateY(0); } 75% { opacity: 1; } 100% { opacity: 0; transform: translateY(-18px); } }
+.ico.deckchip .tip { width: 300px; }
+.panel p.kbnote.decknote { margin-top: 0; }
+/* a move that would draw your last card */
+.actions .btn.deckout small { color: #fff; text-shadow: 1px 1px 0 #14324a; }
+.actions .btn.deckout b { background-image: linear-gradient(#fff, #ffd9d0); }
+
+/* ---- a bar a decision would change: a marker at the value it would fall to ---- */
+.meter.prev .tube { outline: 3px solid #ffbe1f; outline-offset: 3px; }
+.tube .pv { position: absolute; left: 0; right: 0; height: 0; z-index: 3; border-top: 3px dashed #fff8e0; filter: drop-shadow(0 1px 0 #14324a); }
+.tube .pv b { position: absolute; left: 50%; bottom: 3px; transform: translateX(-50%); padding: 0 5px 1px; font: 400 19px/1 var(--f-label); color: #14324a; background: #ffbe1f; box-shadow: 0 0 0 2px #14324a; }
+.tube .pv.hi b { bottom: auto; top: 5px; }
+
+/* ---- selecting chain cards, then playing them: the preview in the left box ---- */
+.cprev { display: grid; gap: 4px; }
+.cprow { display: flex; align-items: center; gap: 2px 8px; }
+.card.sel[data-tag="selected"]::after { font-size: 14px; }
+.cpname { flex: none; font: 400 19px/1 var(--f-label); color: #14324a; }
+.cpcards { display: flex; }
+.cpcards .card { flex: none; margin: 5px 2px 3px; box-shadow: 0 0 0 2px var(--card-edge); }
+.cpcards .card.old { background: #dfe7ef; }
+.cpcards .card.old b { color: #4f6f80; }
+.cpcards .card.new { --card-edge: #e8951f; background: linear-gradient(#fffbe0, #ffe27a); transform: translateY(-4px); }
+.cpres { font: 400 21px/1 var(--f-label); color: #1f8a3a; white-space: nowrap; }
+.cpres::before { content: "= "; color: var(--dim); }
+.panel .cprev p { margin: 0; font: 700 14px/1.22 var(--f-text); }
+.panel .cprev p.cpwhy { font-size: 15px; color: #a3201a; }
+.panel .cprev p.cpalt { color: #35566b; }
+.panel .cprev p.cpkey { display: flex; align-items: center; gap: 5px; font: 800 12.5px/1 var(--f-text); color: #35566b; margin: -1px 0 1px 2px; }
+.cpkey i { display: inline-block; width: 9px; height: 12px; margin-right: 1px; box-shadow: 0 0 0 2px #14324a; }
+.cpkey i.new { margin-left: 10px; }
+#dInfo h4 .linkbtn { float: right; padding: 0; margin-top: 3px; }
+.cpkey i.old { background: #dfe7ef; } .cpkey i.new { background: #ffe27a; box-shadow: 0 0 0 2px #e8951f; }
+.linkbtn { border: 0; margin: 0; padding: 3px 0 0; background: none; cursor: pointer; font: 800 14px/1.1 var(--f-text); color: #35566b; text-decoration: underline; text-underline-offset: 2px; }
+.linkbtn:hover { color: #14324a; }
+.linkbtn:focus-visible { outline: 3px dashed var(--accent); outline-offset: 2px; }
+/* step 1 (select) and step 2 (play) buttons */
+.actions .chainzone .btn.chaincta b { font-size: 32px; white-space: nowrap; }
+.actions .chainzone .btn.chaincta.kb b { font-size: 25px; }
+.actions .chainzone .btn.chaincta small { font-size: 13.5px; }
+.actions .chainzone .btn.noplay small { white-space: normal; font-size: 13px; line-height: 1.15; }
+.actions .chainzone .btn.noplay b { font-size: 22px; }
+
+/* ---- the Charge: two separate actions, each with what it changes ---- */
+.chargeacts { height: 100%; display: flex; flex-direction: column; gap: 5px; }
+.chargeacts .btn { flex: none; padding: 5px 10px 7px 62px; }
+.chargeacts .btn b { font-size: 30px; }
+.chargeacts .btn small { margin-top: 1px; }
+.chargeacts .eff { display: block; font: 400 21px/1.1 var(--f-label); letter-spacing: .02em; }
+.chargeacts .eff strong { font-weight: 400; font-size: 27px; }
+.chargeacts .sub2 { display: block; margin-top: 1px; font: 700 14px/1.2 var(--f-text); }
+.chargeacts .chargebtn { background: linear-gradient(#2f8fe0, #1f5fa8); }
+.chargeacts .chargebtn:hover { background: linear-gradient(#45a2ee, #2a6fbd); }
+.chargeacts .chargebtn .risk { color: #ffe27a; }
+.chargeacts .bankbtn { padding-left: 12px; }
+.chargeacts.full .attackbtn { padding-top: 10px; padding-bottom: 12px; }
+.orsep { align-self: center; margin: -3px 0 -2px; font: 400 19px/1 var(--f-label); font-style: normal; color: #fff8e0; text-shadow: 2px 2px 0 var(--ink); }
+
+/* ---- a hit bigger than the bar: where the rest went ---- */
+.popnote { position: absolute; z-index: 31; width: 300px; padding: 4px 10px 6px; text-align: center; pointer-events: none; font: 800 16px/1.2 var(--f-text); color: #fff8e0; background: #14324aee; box-shadow: var(--notch-3); animation: notefade 2.4s ease-out forwards; }
+@keyframes notefade { 0% { opacity: 0; transform: translateY(8px); } 8% { opacity: 1; transform: translateY(0); } 85% { opacity: 1; } 100% { opacity: 0; } }
+
+/* ---- a completed chain goes back into its builder's deck ---- */
+.recyc { position: absolute; left: 350px; top: 146px; width: 580px; z-index: 42; padding: 2px 16px 12px; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; cursor: pointer; --t: 1; --edge: #8fe3ff;
+  background: linear-gradient(#1f5fa8f5, #14324af5); color: #fff8e0; box-shadow: 0 -5px 0 var(--edge), 0 5px 0 var(--edge), 0 -8px 0 var(--ink), 0 8px 0 var(--ink); animation: recin calc(.28s * var(--t)) cubic-bezier(.2, .9, .3, 1.2) both; }
+.recyc.mine { --edge: #7fe08a; background: linear-gradient(#1f6a3cf5, #0f3a2af5); }
+.recyc .rtitle { font: 400 56px/1 var(--f-title); letter-spacing: .03em; background-image: var(--gold-text); -webkit-background-clip: text; background-clip: text; color: transparent; filter: var(--text-edge); }
+.recyc .rcards { display: flex; }
+.recyc .rcards .card { flex: none; margin: 3px; box-shadow: 0 0 0 2px var(--card-edge); animation: recleave calc(.5s * var(--t)) ease-in calc(.3s * var(--t)) both; }
+.recyc .rline { font: 800 17px/1.2 var(--f-text); text-wrap: balance; }
+.recyc .rdeck { display: flex; align-items: center; gap: 8px; padding: 3px 14px 4px 10px; font: 400 26px/1 var(--f-label); color: #14324a; background: #fff8e0; box-shadow: var(--notch-3); }
+.recyc .rdeck b { font-weight: 400; font-size: 32px; }
+.recyc .rdeck b:last-of-type { color: #1f8a3a; visibility: hidden; }
+.recyc.s2 .rdeck b:last-of-type { visibility: visible; }
+.recyc.s2 .rdeck { animation: landed .25s ease-out; }
+.recyc.out { animation: recout calc(.18s * var(--t)) ease-in both; }
+@keyframes recin { from { opacity: 0; transform: scale(1.2, .4); } to { opacity: 1; transform: scale(1); } }
+@keyframes recout { to { opacity: 0; transform: translateY(-14px); } }
+@keyframes recleave { to { opacity: .35; transform: translateY(-6px) scale(.9); } }
+
+/* ---- first-match tips: a card over the "what is happening" box, until "Got it" (or your next click on a card) ---- */
+.coach { position: absolute; z-index: 36; padding: 9px 14px 8px; display: flex; flex-direction: column; overflow: hidden; background: #fffbe0; color: #14324a; box-shadow: var(--notch-4), inset 0 0 0 3px #ffbe1f; }
+.coach[hidden] { display: none; }
+.coach h4 { flex: none; margin: 0 0 5px; display: flex; align-items: center; gap: 8px; font: 400 22px/1 var(--f-label); color: #c8322c; letter-spacing: .02em; }
+.coach .cbody { flex: none; font-size: 15px; }
+.coach .cbody p { margin: 0 0 4px; font: 700 1em/1.22 var(--f-text); }
+.coach .cbody b { font-weight: 800; color: #a3201a; }
+.coach .cbtns { flex: none; display: flex; align-items: center; gap: 16px; margin-top: 1px; }
+.coach .chip { margin: 3px; padding: 5px 16px 6px; font-size: 21px; }
+#tips[aria-pressed="false"] { opacity: .8; }
+@media (prefers-reduced-motion: reduce) {
+  .ico.deckchip.last, .ico.deckchip.gain, .ico.deckchip.gain::after, .recyc, .recyc.out, .recyc .rcards .card, .recyc.s2 .rdeck { animation: none; }
+  .popnote { animation: popfade 2.4s linear forwards; }
+}
+
 </style>
 </head>
 <body>
@@ -2632,6 +2753,8 @@ return { playRecipe, recipeDur, SOUNDS };
       wrong: [0, 1].map(p => m.metrics.killingBlowAttempts.filter(k => k.player === p).map(k => k.named)),
       knowsWeak: m.buff[0] && m.buff[0].last ? P[1].weak : null,
       kbReady: [...(m.kbReady || [false, false])],      // who may try a Killing Blow chain this round
+      canPlay: !!(P[0].hand.length && m.findChainPlay(0)),      // you hold a legal chain play (the engine's own search)
+      maxRounds: m.maxRounds,
     };
   }
 
@@ -2683,9 +2806,26 @@ return { playRecipe, recipeDur, SOUNDS };
   // One beat per round: only the big moments (the duel result, a chain, a spell, an attack, a Killing Blow, the end) get a scene;
   // small events (draws, swaps, discards, rolls, counts) just update the screen and the log, with no pause.
   const MAJOR = /played \w+, Player \d played|both played|plays a new chain|adds .* to chain|Spell|attacks, spending|banks the full pool|chaining breaks|is complete|Killing Blow|names (Head|Heart|Throat)|wins the match|ran out|draw by repetition|Gunner charge|unlocks the|takes (his|her) (WINGED|DEMONIC)|Cavalryman:|lets it land|can't stop it|stops the chaining/;
+  // The engine tells what a charge attack caused (the Demon's new form, the Vampire's Shield buff, the Cavalryman's cut) just
+  // BEFORE the attack sentence, with the Shield already lowered. On screen the attack is told first, so the Shield bar moves with
+  // its own sentence and number; what it caused follows. Nothing is changed in the engine: only the order of telling.
+  const PRE_ATTACK = /^Cavalryman: |^Vampire: Player \d unlocks the SHIELD buff|^Player \d's Shield (?:has taken damage|is gone): the Demon takes/;
+  const ATTACK = /^Player \d attacks, spending/;
+  function attackFirst() {
+    const q = G.events; if (!q.length || !PRE_ATTACK.test(q[0].raw)) return;
+    let j = 0; while (j < q.length && PRE_ATTACK.test(q[j].raw)) j++;
+    if (j >= q.length || !ATTACK.test(q[j].raw)) return;
+    const [atk] = q.splice(j, 1);
+    for (let i = 0; i < j; i++) q[i] = { ...q[i], snap: atk.snap };
+    q.unshift(atk);
+  }
+  // a hit that is acted out: the bars wait for the strike to land (they used to move as soon as the sentence appeared)
+  const HIT = /^Player 1 played \w+, Player 2 played \w+\. Player \d wins|^Player 1 and Player 2 both played|^Player \d attacks, spending|is complete: it leaves the table/;
+  const release = () => { if (G.held) { G.held = null; renderGauges(); } };
   async function playEvents() {
     while (G.events.length) {
       if (!one('#arena')) { G.events.length = 0; return; }      // the match was left (New match): nothing to show
+      attackFirst();
       const e = G.events.shift(), prev = G.view;
       const text = tell(e.raw), major = MAJOR.test(e.raw);
       const fm = e.raw.match(FORM_EVT); if (fm) G.formNow[fm[1] - 1] = fm[2].toLowerCase();      // the form on screen changes with its own sentence
@@ -2700,9 +2840,10 @@ return { playRecipe, recipeDur, SOUNDS };
       const modeWas = G.mode;
       if ((major || ROLLS.test(e.raw)) && !fm) setMode(modeForText(e.raw));      // (a change of form keeps the screen as it is)
       G.view = e.snap;
+      G.held = major && prev && speed > 0 && !G.skip && HIT.test(e.raw) ? prev : null;      // the gauges keep the old numbers until the hit lands
       renderWatching(text);
       try { eventSounds(e.raw, prev, e.snap, major, modeWas !== G.mode && modeWas !== 'kb' && G.mode !== 'kb'); } catch (err) { /* a sound never stops the game */ }      // (into and out of the Killing Blow: its own sounds lead)
-      if (major) await animate(e.raw, prev, e.snap);
+      if (major) { await animate(e.raw, prev, e.snap); release(); }
       else {
         quickPops(prev, e.snap);
         const ms = rollScene(e.raw, prev, e.snap, G.skip ? 0 : speed);      // a charge die, escape dice, a reroll: a short roll you can see
@@ -2726,7 +2867,8 @@ return { playRecipe, recipeDur, SOUNDS };
       if (dm) showRoll(w, sidesIn(prev, now, w, 'duel'), dm[1].split('+').map(Number), { t, land: mv === 'Block' ? 760 : 300, hold: 1000, total: true, sfxDelay: 120 });
       const hitBy = mv === 'Block' ? F[w].pose('blocking', 700 * t).then(() => F[w].pose('attacking', 800 * t)) : F[w].pose('attacking', 1000 * t);
       await sleep((mv === 'Block' ? 900 : 360) * t);
-      F[l].pose('hurt', 600 * t); renderGauges(); pops();
+      G.held = null;
+      F[l].pose('hurt', 600 * t); renderGauges(); pops(); lostNote(raw, prev, t);
       await hitBy; await sleep(250 * t); return;
     }
     m = raw.match(/^Player 1 and Player 2 both played (\w+)/);
@@ -2734,16 +2876,19 @@ return { playRecipe, recipeDur, SOUNDS };
       revealMoves(m[1], m[1]);
       const a = m[1] === 'Block' ? 'blocking' : 'attacking';
       await Promise.all([F[0].pose(a, 800 * t), F[1].pose(a, 800 * t)]);
+      G.held = null;
       renderGauges(); pops(); await sleep(400 * t); return;
     }
     m = raw.match(/^Player (\d) attacks, spending/);
     if (m) {
       const a = Number(m[1]) - 1;
       const go = F[a].pose('attacking', 1000 * t); await sleep(360 * t);
-      F[1 - a].pose('hurt', 600 * t); renderGauges(); pops(); await go; return;
+      G.held = null;
+      F[1 - a].pose('hurt', 600 * t); renderGauges(); pops(); lostNote(raw, prev, t); await go; return;
     }
     m = raw.match(/^Player (\d)'s Killing Blow chain landed/);
     if (m) { renderGauges(); if (t > 0) await kbIntro(m[1] - 1); return; }
+    if (/is complete: it leaves the table/.test(raw)) { await recycleScene(raw, prev, now, t); return; }
     if (/the chaining breaks/.test(raw)) { renderGauges(); pops(); await breakScene(raw, prev, now, t); return; }
     if (/stops the chaining/.test(raw)) { renderGauges(); pops(); if (!(await stopScene(raw, prev, now, t))) await sleep(550 * t); return; }
     m = raw.match(FORM_EVT);
@@ -3074,6 +3219,25 @@ return { playRecipe, recipeDur, SOUNDS };
     el.style.left = (f.offsetLeft + f.offsetWidth / 2 - 70) + 'px'; el.style.top = (f.offsetTop + 30 + Math.random() * 30) + 'px';
     one('#arena').appendChild(el); setTimeout(() => el.remove(), 1100);
   }
+  // A hit whose number is bigger than what the bar could lose: say where the rest went (bars never go below 0, nothing carries over).
+  // Every number is read from the engine's sentence and from the bars before the hit.
+  function lostNote(raw, prev, t) {
+    if (!prev || !(t > 0)) return;
+    let m = raw.match(/= (\d+) damage to Player (\d)'s (break|last)\./), rolled, p, bar;
+    if (m) { rolled = Number(m[1]); p = m[2] - 1; bar = m[3]; }
+    else if ((m = raw.match(/: (\d+) - (\d+) = (\d+) damage to Player (\d)'s Shield\./))) {
+      rolled = Number(m[3]); p = m[4] - 1; bar = 'shield';
+      if (rolled === 0) { noteAt(p, Number(m[1]) > 0 ? `No damage: the escape die (${m[2]}) blocked all ${m[1]}` : 'No damage'); return; }
+    } else return;
+    const had = prev.bars[p][bar];
+    if (rolled > had) noteAt(p, had > 0 ? `${BAR_NAME[bar]} had only ${had} left: the other ${rolled - had} is lost` : `${BAR_NAME[bar]} is already 0: the ${rolled} does nothing`);
+  }
+  function noteAt(p, text) {
+    const arena = one('#arena'), f = G.fighters[p].el, el = document.createElement('div'); if (!arena) return;
+    el.className = 'popnote'; el.textContent = text; el.setAttribute('role', 'status');
+    el.style.left = Math.max(206, Math.min(1074 - 300, f.offsetLeft + f.offsetWidth / 2 - 150)) + 'px'; el.style.top = (f.offsetTop + 124) + 'px';
+    arena.appendChild(el); setTimeout(() => el.remove(), 2400);
+  }
   function addLog(text) {
     const li = document.createElement('li'); li.textContent = text; one('#log').appendChild(li);
     G.log.push(text);
@@ -3086,6 +3250,7 @@ return { playRecipe, recipeDur, SOUNDS };
       <div class="stage"><i class="d1"></i><i class="d2"></i><i class="d3"></i><i class="d4"></i><i class="d5"></i></div>
       <div class="round" id="round"></div>
       <div class="track" id="track">${STEPS.map(s => `<span>${s}</span>`).join('')}</div>
+      <div class="goal" id="goal" tabindex="0" role="status" aria-label="Your goal"></div>
       <div class="panel gp" id="g0"></div><div class="panel gp" id="g1"></div>
       ${[0, 1].map(p => `<div class="fighter ${p ? 'r' : 'l'}" id="f${p}">${ART[G.chars[p]].standing.length ? '' : `<span class="ph">${esc(CHARACTERS[G.chars[p]].name)} · art coming</span>`}<i class="shadowdisc"></i>
         <div class="sprite"><div class="mover"></div></div>
@@ -3096,6 +3261,7 @@ return { playRecipe, recipeDur, SOUNDS };
       <div class="prompt" id="prompt"><b></b><span></span></div>
       <div class="panel" id="dInfo"></div><div class="panel" id="dHand"></div>
       <div class="actions" id="dAct"></div>
+      <div class="coach" id="coach" hidden></div>
     </div>`;
     G.fighters = [0, 1].map(p => new Fighter(one('#f' + p), G.chars[p], p));
     G.view = snapshot(G.match);
@@ -3122,6 +3288,7 @@ return { playRecipe, recipeDur, SOUNDS };
     one('#prompt').style.top = o.dockY + 'px';
     pos(one('#dInfo'), 20, colY, 400, colH); pos(one('#dHand'), 432, colY, 420, colH);
     pos(one('#dAct'), 864, colY, 396, colH);
+    pos(one('#coach'), 20, colY, 400, colH);      // a first-match tip lies over the "what is happening" box
     one('#reveal').style.top = (TABLE_END + 8) + 'px';
     all('#track span').forEach((s, i) => s.classList.toggle('on', i === o.step));
   }
@@ -3149,9 +3316,12 @@ return { playRecipe, recipeDur, SOUNDS };
   function meter(v, p, i) {
     const b = BAR[i], val = v.bars[p][b], max = v.max[p][b], pct = max ? Math.min(100, val / max * 100) : 0;
     const cur = (v.bars[p].shield === 0 ? 2 : 0) === i;
-    return `<div class="meter${cur ? ' cur' : ''}${val === 0 ? ' empty' : ''}" style="--max:${Math.max(1, max)}">
+    // a decision that would change this bar (your attack, or theirs): a marker at the value it would fall to
+    const pv = G.preview && G.preview.p === p && G.preview.bar === b && G.preview.to !== val ? G.preview : null;
+    const mark = pv ? `<i class="pv${max && pv.to / max > .8 ? ' hi' : ''}" style="bottom:${max ? Math.min(100, pv.to / max * 100) : 0}%" data-to="${pv.to}"><b>${pv.to}</b></i>` : '';
+    return `<div class="meter${cur ? ' cur' : ''}${val === 0 ? ' empty' : ''}${pv ? ' prev' : ''}" style="--max:${Math.max(1, max)}"${pv ? ` title="${esc(pv.tip)}"` : ''}>
       <span class="val"><b>${val}</b>/${max}</span>
-      <div class="tube"><i class="trail" style="height:${pct}%"></i><i class="fill k${i}" style="height:${pct}%"></i><i class="ticks"></i></div>
+      <div class="tube"><i class="trail" style="height:${pct}%"></i><i class="fill k${i}" style="height:${pct}%"></i><i class="ticks"></i>${mark}</div>
       <span class="name">${BAR_NAME[b]}</span></div>`;
   }
   // the Demon's form in his gauge: its name on a band in the form's colour, three steps (past, now, to come) and the dice he rolls now
@@ -3160,8 +3330,68 @@ return { playRecipe, recipeDur, SOUNDS };
     return `<div class="formbox ${form}" title="${esc(formTip(form, s))}"><b>${pic(FORMS[form].art, 2)}<span>${FORMS[form].name}</span><span class="fsteps" aria-label="Form ${at + 1} of 3">${FORM_ORDER.map((f, i) => `<i class="${f}${i <= at ? ' on' : ''}${i === at ? ' now' : ''}"></i>`).join('')}</span></b><small>${esc(formDice(form, s))}</small></div>`;
   }
   const ico = (art, name, tip, right) => `<span class="ico${right ? ' right' : ''}" tabindex="0" role="img" aria-label="${esc(name)}">${pic(art, 2)}<span class="tip"><b>${esc(name)}</b>${tip}</span></span>`;
+  // which moves draw from the deck, and how many cards (read from the engine's settings): Block draws, Heavy discards then draws
+  const drawsOf = k => { const m = SETTINGS.moves[k]; return (m.draw || 0) + (m.effect === 'cycle' ? 1 : 0); };
+  const DRAW_MOVES = MOVES.filter(k => drawsOf(k) > 0);
+  const lowDeck = n => n <= SETTINGS.cards.handSize;      // a deck this small is called out (the same mark as the deck-low sound)
+  // the deck: always on screen as a number under the bars (it used to be behind an icon)
+  function deckChip(v, p) {
+    const me = p === 0, n = v.deck[p], k = v.chars[p], jk = CHARACTERS[k].deck.jokers;
+    const last = SETTINGS.deckOutLoses && DRAW_MOVES.some(m => drawsOf(m) >= n);
+    const tip = `${plural(n, 'card')} left${jk ? `, ${v.jokersLeft[p]} of them Jokers` : ''}. ${SETTINGS.deckOutLoses ? `A deck that reaches 0 loses the match, right after its last card is drawn (${DRAW_MOVES.map(m => MOVE_NAME[m]).join(' and ')} each draw ${drawsOf(DRAW_MOVES[0])}). ` : ''}A completed chain is shuffled back into its builder’s deck.${last ? ` ${me ? 'Your' : 'Their'} next ${DRAW_MOVES.map(m => MOVE_NAME[m]).join(' or ')} draws the last card: ${me ? 'you lose' : 'they lose'}.` : ''}`;
+    return `<span class="ico deckchip${last ? ' last' : lowDeck(n) ? ' low' : ''}${me ? '' : ' right'}" tabindex="0" role="img" data-deck="${n}" aria-label="${me ? 'Your' : 'Their'} deck: ${plural(n, 'card')}">${pic('deck', 2)}<b>${n}</b><span class="tip"><b>${me ? 'Your deck' : 'Their deck'}</b>${esc(tip)}</span></span>`;
+  }
+
+  /* ---------------- the goal: what you are trying to do right now, beside the moment track ---------------- */
+  // Read from one snapshot of the match (the engine's numbers) and the engine's settings; no rule is decided here.
+  function objective(v, kind) {
+    const me = 0, them = 1, o = v.bars[them], own = v.bars[me], mx = v.max[them], c = CHARACTERS[v.chars[them]], mineC = CHARACTERS[v.chars[me]];
+    const L = SETTINGS.chain.minLength, restart = Math.ceil(mx.last * SETTINGS.killingBlow.restartFraction);
+    const collect = `collect ${L} of one number or ${L} in a row${v.chains[me].length ? ', or a card that extends one of your chains' : ''}`;
+    let step, key, line;
+    if (v.over || v.winner !== null) { step = -1; key = 'over'; line = 'The match is over.'; }
+    else if (!v.weak) { step = 0; key = 'setup'; line = 'Setup: choose your secret weak point, then swap one card.'; }
+    else if (o.last === 0) {
+      step = 3;
+      if (!v.kbReady[me]) { key = 'kb-next'; line = 'Their Last is 0: from next round, a chain you play is your Killing Blow.'; }
+      else if (v.canPlay) { key = 'kb'; line = 'Killing Blow: play a chain now. If it lands, name their weak point to win.'; }
+      else { key = 'kb-nochain'; line = `Their Last is 0 but you hold no chain: ${collect} for the Killing Blow.`; }
+    } else if (o.shield === 0) { step = 2; key = 'last'; line = `Their Shield is gone: win duel rounds to empty their Last (${o.last} left). Then a chain is your Killing Blow.`; }
+    else if (o.break === 0) {
+      step = 1;
+      if (v.canPlay) { key = 'chain'; line = `Their Break is 0: play a chain. If it lands, your Charge hits their Shield (${o.shield} left).`; }
+      else { key = 'chain-nochain'; line = `Their Break is 0 but you hold no chain: ${collect}.`; }
+    } else { step = 0; key = 'break'; line = `Win duel rounds to empty their Break (${o.break} left). At 0 you can play a chain.`; }
+    // the moment you are in right now comes first: a chain played on you, a Charge, your Killing Blow
+    if (step >= 0 && v.weak) {
+      if (kind === 'killing-blow') { key = 'name'; line = 'Your Killing Blow chain landed: name their weak point to win.'; }
+      else if (kind === 'defend' && own.last === 0 && v.kbReady[them]) { key = 'defend-kb'; line = 'Their Killing Blow chain: stop it with cards, or they name your weak point.'; }
+      else if (kind === 'defend') { key = 'defend'; line = `They played a chain on you: stop it with cards, or their Charge hits your Shield (${own.shield} left).`; }
+      else if (kind === 'charge') { key = 'charge'; line = `Your chain landed. Attack to hit their Shield (${o.shield} left), or charge again for a bigger hit.`; }
+      else if (kind === 'keep') { key = 'escape'; line = `You are chained: roll all your escape dice the same to break free, or their attack hits your Shield (${own.shield} left).`; }
+    }
+    const dice = v.sides[me], W = c.weakPoints;
+    const steps = [
+      { name: `1 · Break ${o.break}/${mx.break}`, text: `Their first bar. You hurt it by winning duel rounds (Basic beats Heavy, Heavy beats Block, Block beats Basic). While it is 0 and their Shield is up, you may play a chain instead of a move: ${L} or more cards of one number, or in a row.` },
+      { name: `2 · Shield ${o.shield}/${mx.shield}`, text: `Duel hits never touch it: you need a chain. They can stop a chain by discarding as many cards as it is long. If it lands, you Charge: roll d${dice.attack}s into a pool, then attack for the pool minus their highest escape die. After every Charge their Break refills to ${mx.break}.${mineC.poison ? ' Your poison can hurt it too.' : ''}` },
+      { name: `3 · Last ${o.last}/${mx.last}`, text: `The final stage. Once their Shield is 0, your duel hits go to their Last instead of their Break, and ordinary chains stop. With no Shield they roll ${c.forms ? 'triple' : SETTINGS.comebackDice === 2 ? 'double' : SETTINGS.comebackDice + ' times the'} duel dice (the comeback).` },
+      { name: '4 · Killing Blow', text: `From the round after their Last reaches 0, and while it stays 0, a chain you play is a Killing Blow chain. They can still stop it with cards. If it lands there is no Charge: you name ${W.length > 1 ? `one weak point (${W.join(', ')})` : `their weak point (always the ${W[0]})`}. Right: you win.${W.length > 1 ? ` Wrong: their Last restarts at ${restart}.` : ''}` },
+    ];
+    const other = `${SETTINGS.deckOutLoses ? 'A deck that reaches 0 cards loses the match. ' : ''}The same move from both players ${SETTINGS.repetitionDraw} rounds in a row is a draw. No winner after ${v.maxRounds} rounds. The computer is after the same goal against you.`;
+    return { step, key, line, steps, other };
+  }
+  function renderGoal(v) {
+    const el = one('#goal'); if (!el) return;
+    const g = objective(v, pending ? pending.d.kind : null), html = `<b>Goal</b><span class="gline">${esc(g.line)}</span><span class="gmore" aria-hidden="true">?</span>`
+      + `<div class="tip gtip"><b>How you win</b>${g.steps.map((s, i) => `<p class="${i === g.step ? 'now' : i < g.step ? 'done' : ''}"><strong>${esc(s.name)}${i === g.step ? ' ◂ you are here' : ''}</strong>${esc(s.text)}</p>`).join('')}<p class="other">${esc(g.other)}</p></div>`;
+    if (el._html === html) return;
+    el._html = html; el.innerHTML = html; el.dataset.step = g.step; el.dataset.key = g.key;
+    // text-fit: the sentence always stays inside its two lines
+    const s = one('.gline', el); for (let f = 16; f >= 12 && s.scrollHeight > 38; f--) s.style.fontSize = f + 'px';
+  }
   function renderGauges() {
-    const v = G.view;
+    const v = G.held || G.view;
+    renderGoal(v);
     one('#round').textContent = `Round ${v.round}`;
     const glide = speed > 0 && !G.skip && !stillMotion();
     [0, 1].forEach(p => {
@@ -3169,7 +3399,7 @@ return { playRecipe, recipeDur, SOUNDS };
       const form = formShown(p); if (form && G.fighters) G.fighters[p].setForm(form);
       // where each bar is right now (even half-way through a move), so the new bars glide on from there
       const was = glide ? all('#g' + p + ' .tube').map(t => { const h = t.getBoundingClientRect().height || 1; return ['.trail', '.fill'].map(s => one(s, t).getBoundingClientRect().height / h * 100); }) : [];
-      const icons = ico('deck', 'Deck', `${plural(v.deck[p], 'card')}${CHARACTERS[k].deck.jokers ? `, ${v.jokersLeft[p]} of them Jokers` : ''}. At 0 ${me ? 'you lose' : 'they lose'}.`, !me)
+      const icons = deckChip(v, p)
         + ico('discard', 'Discard pile', disc.length ? disc.map(cardStr).join(', ') + '.' : 'Empty.', !me)
         + ico('rules', `${name} rules`, rulesFor(k).map(esc).join('<br>'), !me)
         + (me ? ico('weak', 'Your weak point', `${v.weak || 'not chosen yet'}. Only you see it.`)
@@ -3272,6 +3502,7 @@ return { playRecipe, recipeDur, SOUNDS };
   function decide(d) {
     return new Promise(resolve => {
       G.view = snapshot(G.match); G.picks = []; G.extra = null; G.error = ''; G.skip = false; G.kbHurry = false;
+      G.held = null; G.armed = null;
       pending = { d, resolve };
       const modeWas = G.mode;
       render();
@@ -3293,19 +3524,26 @@ return { playRecipe, recipeDur, SOUNDS };
     if (d.kind === 'duel' && r.value.type === 'move') G.lastMoves[0] = r.value.key;
     if (d.kind === 'keep') G.kept = r.value;
     one('#dAct').innerHTML = ''; one('#turn').style.display = 'none';
+    G.preview = null; coachHide();
     all('.chainsign').forEach(x => x.remove());
     resolve({ ...r, action });
   }
   function onClick(e) {
     if (e.target.closest('#skip')) { const sk = e.target.closest('#skip'); if (!sk.classList.contains('off')) { G.skip = true; sfxStop(); sfx('button'); sk.classList.add('off'); } return; }      // the skipped events stay silent
-    const t = e.target.closest('[data-pick],[data-act],[data-chainpick]');
+    const ct = e.target.closest('[data-coach]');
+    if (ct) { coachClick(ct.dataset.coach); return; }
+    const t = e.target.closest('[data-pick],[data-act],[data-chainpick],[data-clear]');
     if (!t || !pending) return;
-    if (t.dataset.chainpick !== undefined) { G.picks = t.dataset.chainpick.split(' ').map(Number); G.error = ''; sfx('card-select'); render(); return; }
+    if (t.dataset.clear !== undefined) { G.picks = []; G.error = ''; G.armed = null; sfx('card-select'); render(); return; }
+    if (t.dataset.chainpick !== undefined) { G.picks = t.dataset.chainpick.split(' ').map(Number); G.error = ''; G.armed = null; if (G.coachNow === 'chain') coachHide(); sfx('card-select'); render(); return; }      // only selects: nothing is played
     if (t.dataset.act !== undefined) {
       if (t.classList.contains('off')) { sfx(pending.d.kind === 'duel' && G.view.frozen[0][t.dataset.act] > 0 ? 'frozen-click' : 'error'); return; }
+      // a move that would draw your last card (you would lose): the first click only warns, the second one plays it
+      if (t.dataset.warn !== undefined && G.armed !== t.dataset.act) { G.armed = t.dataset.act; sfx('deck-low'); render(); return; }
       submit(t.dataset.act); return;
     }
     const zone = t.dataset.zone, i = Number(t.dataset.pick), d = pending.d;
+    G.armed = null; if (G.coachNow === 'chain') coachHide();
     sfx(zone === 'die' ? 'keep-die' : 'card-select');
     if (zone === 'discard') { G.extra = G.extra === i ? null : i; render(); return; }
     const single = ['setup-discard', 'heavy-cycle', 'basic-swap'].includes(d.kind);
@@ -3316,7 +3554,7 @@ return { playRecipe, recipeDur, SOUNDS };
     }
     render();
   }
-  const btn = (act, title, sub, o = {}) => `<button type="button" class="btn ${o.cls || ''}${o.icon ? ' icon' : ''}${o.off ? ' off' : ''}" data-act="${esc(act)}"${o.off ? ' aria-disabled="true"' : ''}>${o.icon ? pic(o.icon, 3) : ''}<b>${title}</b>${sub ? `<small>${sub}</small>` : ''}</button>`;
+  const btn = (act, title, sub, o = {}) => `<button type="button" class="btn ${o.cls || ''}${o.icon ? ' icon' : ''}${o.off ? ' off' : ''}" data-act="${esc(act)}"${o.warn ? ' data-warn' : ''}${o.off ? ' aria-disabled="true"' : ''}>${o.icon ? pic(o.icon, 3) : ''}<b>${title}</b>${sub ? `<small>${sub}</small>` : ''}</button>`;
   const more = (label, lines) => `<details class="more"><summary>${label}</summary><div class="body">${lines.map(l => `<p>${l}</p>`).join('')}</div></details>`;
   // o.chain (from chainHints): cards that can go into a chain are gold, the suggested ones pulse, the rest are dimmed
   const handHtml = (v, o = {}) => `<div class="cards">${v.hand.map((n, i) => card(n, { pick: o.pickable ? i : undefined, sel: G.picks.includes(i), selTag: o.selTag,
@@ -3326,6 +3564,7 @@ return { playRecipe, recipeDur, SOUNDS };
   function render() {
     if (!pending) return;
     const d = pending.d, v = G.view, me = 0, them = 1;
+    G.preview = previewFor(d, v);
     renderGauges();
     const turn = one('#turn'); turn.style.display = ''; turn.textContent = '▼ Your turn'; turn.classList.remove('chain');
     const info = one('#dInfo'), hand = one('#dHand'), act = one('#dAct');
@@ -3343,7 +3582,8 @@ return { playRecipe, recipeDur, SOUNDS };
       case 'setup-discard':
       case 'heavy-cycle': {
         const setup = d.kind === 'setup-discard';
-        setMode('duel'); setPrompt(setup ? 'Setup' : 'Heavy', setup ? 'Pick one card to discard. Then you draw one.' : 'Heavy’s card effect: pick one card to discard, then draw one.');
+        const lastCard = !setup && SETTINGS.deckOutLoses && v.deck[me] <= drawsOf('heavy');
+        setMode('duel'); setPrompt(setup ? 'Setup' : 'Heavy', setup ? 'Pick one card to discard. Then you draw one.' : lastCard ? 'Heavy’s card effect: pick one card to discard. Then you draw your last card: your deck runs out and you lose.' : 'Heavy’s card effect: pick one card to discard, then draw one.');
         info.innerHTML = setup ? `<h4>Mulligan</h4><p>Every player must swap one card at the start.</p><p class="dim">Deck: ${plural(v.deck[me], 'card')}.</p>` : `<h4>What happened</h4><div class="feed">${G.log.slice(-3).reverse().map(l => `<p>${esc(l)}</p>`).join('')}</div>`;
         fitFeed();
         hand.innerHTML = `<h4>Your hand: pick 1 to discard</h4>${handHtml(v, { pickable: true })}`;
@@ -3364,8 +3604,8 @@ return { playRecipe, recipeDur, SOUNDS };
         // rules 1.39: while their Last is 0, a chain you play is a Killing Blow chain (d.kb); the chance can be open with no chain to play
         const kb = !!d.kb && canChain, kbNoChain = !canChain && /you have no chain to play this round/.test(d.prompt), danger = v.kbReady[them] && v.bars[me].last === 0;
         setPrompt(kb ? '★ Killing Blow ready ★' : canChain ? '★ Chain ready' : 'Your move',
-          kb ? 'Their Last is 0: land a chain to strike. Press “Killing Blow chain” or click the gold cards, or pick a move.'
-            : canChain ? 'Their Break is 0. Press “Play a chain” or click the gold cards yourself — or pick Basic, Heavy or Block.'
+          kb ? 'Their Last is 0: land a chain to strike. Select chain cards (the gold ones), then play the Killing Blow chain — or pick a move.'
+            : canChain ? 'Their Break is 0. Select chain cards (the gold ones), check the preview, then play the chain — or pick Basic, Heavy or Block.'
             : kbNoChain ? 'Killing Blow chance: their Last is 0, but you have no chain to play this round. Pick Basic, Heavy or Block.'
             : danger ? `Careful: ${nameOf(them)} can play a Killing Blow chain. Keep cards to stop it. Pick Basic, Heavy or Block.` : 'Pick Basic, Heavy or Block.');
         one('#prompt').classList.toggle('glow', canChain); hand.classList.toggle('glow', canChain);
@@ -3378,7 +3618,14 @@ return { playRecipe, recipeDur, SOUNDS };
         }
         const opp = v.bars[them];
         const nCh = [me, them].map(p => v.chains[p].length);
-        info.innerHTML = `<h4>Round ${v.round}</h4><p>${theirName} holds ${plural(v.oppHand, 'card')}.</p>`
+        // your deck: how close it is to running out, and which moves would draw its last card (you would lose)
+        const deckN = v.deck[me], doom = k => SETTINGS.deckOutLoses && drawsOf(k) > 0 && drawsOf(k) >= deckN, doomed = MOVES.filter(doom);
+        const deckNote = doomed.length ? `<p class="kbnote bad decknote">⚠ Deck: ${plural(deckN, 'card')} left. ${doomed.map(k => MOVE_NAME[k]).join(' or ')} draws it: you lose.${v.chains[me].length || canChain ? ' A completed chain refills your deck.' : ''}</p>`
+          : lowDeck(deckN) ? `<p class="kbnote decknote">⚠ Deck: ${plural(deckN, 'card')} left. ${DRAW_MOVES.map(k => MOVE_NAME[k]).join(' and ')} each draw ${drawsOf(DRAW_MOVES[0])}; at 0 you lose.</p>` : '';
+        // cards are selected: the left box shows what they would make (nothing is played until a "Play" button is pressed)
+        const plans = canChain && G.picks.length ? chainPlans(v) : null;
+        if (plans) info.innerHTML = chainPreview(v, plans, kb);
+        else info.innerHTML = `<h4>Round ${v.round}</h4>${deckNote || `<p>${theirName} holds ${plural(v.oppHand, 'card')}.</p>`}`
           // one short Killing Blow note at most (it takes the place of the chain count, which the table above already shows)
           + (kb ? `<p class="kbnote">★ If your chain lands: you name their weak point</p>`
             : danger ? `<p class="kbnote bad">⚠ Killing Blow danger: keep cards to stop a chain</p>`
@@ -3389,8 +3636,10 @@ return { playRecipe, recipeDur, SOUNDS };
             kb ? 'Their Last is 0: a chain you play now (new from your hand, or added to one of yours) is a Killing Blow chain. They can stop it by discarding as many cards. If it lands there is no Charge: you name their weak point.'
               : canChain ? 'Their Break is 0: you can play a chain (three or more cards of one number, or in a row) instead of a move.'
               : `You can start a chain only when their Break is 0 (now ${opp.break})${opp.shield === 0 ? ' and their Shield is still up' : ''}.`,
-            'Killing Blow: from the round after a Last bar reaches 0, and while it stays at 0, the other player may play a chain instead of a move. If it lands, they name one weak point; the right one wins.']);
-        hand.innerHTML = `<h4>${kb ? '★ Killing Blow: the gold cards can chain' : canChain ? '★ Chain ready: the gold cards can chain' : 'Your hand'}</h4>${handHtml(v, { pickable: canChain, selTag: 'chain', chain: hints })}${canChain ? err : ''}`;
+            'Killing Blow: from the round after a Last bar reaches 0, and while it stays at 0, the other player may play a chain instead of a move. If it lands, they name one weak point; the right one wins.',
+            `Deck: ${DRAW_MOVES.map(k => MOVE_NAME[k]).join(' and ')} each draw ${drawsOf(DRAW_MOVES[0])} card. A deck that reaches 0 loses the match. A completed chain is shuffled back into its builder’s deck.`]);
+        if (canChain && !G.picks.length) coach('chain', kb);
+        hand.innerHTML = `<h4>${canChain && G.picks.length ? `${plural(G.picks.length, 'card')} selected · not played yet` : kb ? '★ Killing Blow: select the gold cards' : canChain ? '★ Chain ready: select the gold cards' : 'Your hand'}</h4>${handHtml(v, { pickable: canChain, selTag: 'selected', chain: hints })}${canChain ? err : ''}`;
         const legalKey = k => d.legal.some(l => l.startsWith(k + ' '));
         const why = k => {
           if (v.frozen[me][k] > 0 && !legalKey(k)) return `Frozen for ${plural(v.frozen[me][k], 'more round')}`;
@@ -3403,14 +3652,17 @@ return { playRecipe, recipeDur, SOUNDS };
         // with a chain ready the three moves become one-line buttons (same order, same place) so the chain buttons fit under them
         const short = { basic: '1 die · swap a card', heavy: '2 dice · discard 1, draw 1', block: `hits 1 die${CHARACTERS[v.chars[me]].blockRegain ? `, heals ${CHARACTERS[v.chars[me]].blockRegain}` : ''} · draw 1` };
         let chainBtns = '';
-        if (canChain && G.picks.length) chainBtns = chainButtons(v);
+        if (canChain && G.picks.length) chainBtns = chainButtons(v, plans, kb);
         else if (canChain && hints.suggest.length) {
+          // step 1 of 2: this button only SELECTS the cards the engine would play; the play itself is the next button
           const sg = hints.suggest, cs = sg.map(i => cardStr(v.hand[i])).join(' · ');
           const adds = sg.length < SETTINGS.chain.minLength;      // fewer cards than a new chain needs: they go onto a chain on the table
-          chainBtns = `<button type="button" class="btn icon chaincta${kb ? ' kb' : ''}" data-chainpick="${sg.join(' ')}">${pic('star', 3)}<b>${kb ? 'Killing Blow chain' : 'Play a chain'}</b><small>${adds ? `Picks your ${cs} to add to a chain` : `Picks ${cs} from your hand`}</small></button>`;
+          chainBtns = `<button type="button" class="btn icon chaincta${kb ? ' kb' : ''}" data-chainpick="${sg.join(' ')}">${pic('star', 3)}<b>${kb ? 'Select Killing Blow cards' : 'Select chain cards'}</b><small>${adds ? `Selects ${cs} to add to a chain` : `Selects ${cs}`} · not played yet</small></button>`;
         }
         const nBtns = (chainBtns.match(/<button/g) || []).length;
-        act.innerHTML = MOVES.map((k, i) => btn(k, MOVE_NAME[k], (why(k) || (canChain ? short : sub)[k]) + fire(k), { icon: icon[k], off: !!why(k), cls: (i === 0 && !why(k) ? 'main' : '') + (canChain ? ' line' : '') })).join('')
+        // a move that would draw your last card says so (and asks twice)
+        const doomSub = k => G.armed === k ? (canChain ? '⚠ Click again: you lose the match' : '⚠ Click again to play it and lose the match') : canChain ? '⚠ Draws your last card: you lose' : '⚠ Draws your last card: your deck runs out, you lose';
+        act.innerHTML = MOVES.map((k, i) => btn(k, MOVE_NAME[k], (why(k) || (doom(k) ? doomSub(k) : (canChain ? short : sub)[k])) + fire(k), { icon: icon[k], off: !!why(k), warn: doom(k) && !why(k), cls: (doom(k) && !why(k) ? 'danger deckout' : i === 0 && !why(k) ? 'main' : '') + (canChain ? ' line' : '') })).join('')
           + (canChain ? `<div class="chainzone n${Math.min(nBtns, 5)}${kb ? ' kb' : ''}">${chainBtns}</div>` : err);
         break;
       }
@@ -3456,8 +3708,14 @@ return { playRecipe, recipeDur, SOUNDS };
         info.innerHTML = `<h4>Your pool</h4><div class="row">${pool.map(x => die(x, { cls: 'd8' })).join('')}<b class="total">Total ${total}</b></div><p class="dim">${pm ? `${pm[1]} of at most ${pm[2]} dice` : ''}</p>`
           + more('Charge rules', ['Attack: your total minus their highest die hits their Shield, and every die is spent.', 'Charge again: you roll one more die; they roll fresh escape dice, and if all of them match, the chaining breaks (you keep your pool).'].concat(bank ? ['Bank (Demon, full pool only): the Charge ends with no attack. You keep your dice for your next Charge; their Break refills.'] : []));
         hand.innerHTML = `<h4>${theirName}’s escape dice</h4><div class="row">${dice.map(x => die(x)).join('')}</div><p class="note2"><b>Attack now:</b> ${total} − ${hi} = ${dmg} damage to their Shield (${v.bars[them].shield} → ${Math.max(0, v.bars[them].shield - dmg)})</p>`;
-        act.innerHTML = btn('attack', 'Attack', `${dmg} damage to their Shield`, { cls: 'main mid' }) + (full ? '' : btn('charge', 'Charge again', 'Roll one more die', { cls: 'mid' }))
-          + (bank ? btn('bank', 'Bank', 'Keep your dice for your next Charge; their Break refills', { cls: 'mid' }) : '') + err;
+        // two separate actions, each with what it changes: Attack (their Shield, now) and Charge again (your pool, and a new escape roll for them)
+        const sh = v.bars[them].shield, shTo = Math.max(0, sh - dmg), aS = v.sides[me].attack, eS = v.sides[them].defend, nEsc = dice.length, room = pm ? Number(pm[2]) : pool.length;
+        const escName = eS === 2 ? plural(nEsc, 'fresh coin') : `${nEsc} fresh d${eS}`;
+        act.innerHTML = `<div class="chargeacts${full ? ' full' : ''}">`
+          + btn('attack', 'Attack now', `<span class="eff">Their Shield <strong>${sh}</strong> → <strong>${shTo}</strong></span><span class="sub2">${dmg ? `${dmg} damage` : 'No damage'}${shTo === 0 && sh > 0 ? ' · Shield gone: final stage' : ''} · spends ${pool.length === 1 ? 'your die' : `all ${pool.length} dice`} · ends the Charge</span>`, { cls: 'main attackbtn', icon: 'sword' })
+          + (full ? '' : `<i class="orsep" aria-hidden="true">or</i>` + btn('charge', 'Charge again', `<span class="eff">Pool <strong>${pool.length}</strong> → <strong>${pool.length + 1}</strong> dice (of ${room}) · +1 d${aS}</span><span class="sub2 risk">⚠ They roll ${escName} to escape again: all the same breaks the chain, no attack (you keep your pool)</span>`, { cls: 'chargebtn', icon: 'die' }))
+          + (bank ? btn('bank', 'Bank', `<span class="sub2">No attack: keep ${pool.length === 1 ? 'your die' : `all ${pool.length} dice`} for your next Charge; their Break refills to ${v.max[them].break}</span>`, { cls: 'bankbtn compact' }) : '') + '</div>' + err;
+        coach('charge', full);
         break;
       }
       case 'killing-blow': {
@@ -3504,6 +3762,10 @@ return { playRecipe, recipeDur, SOUNDS };
       }
     }
     fitDock();
+    // a long preview (several plays, or several reasons): drawn smaller so it stays inside its box
+    const pv = one('.cprev', info); if (pv) { const end = () => pv.offsetTop + pv.offsetHeight + 12 > (parseFloat(info.style.height) || info.clientHeight); for (const z of [.92, .85, .78, .7, .64]) { if (!end()) break; pv.style.zoom = z; } }
+    // the first completed chain: its tip comes with the next decision (after the tip that decision may have of its own)
+    if (G.recycleTip && !G.coachNow) { if (TIPS.seen.recycle || coach('recycle', G.recycleTip)) G.recycleTip = null; }
   }
 
   // what a chain will do, for the defend screen
@@ -3547,26 +3809,207 @@ return { playRecipe, recipeDur, SOUNDS };
     arena.appendChild(el); setTimeout(() => el.remove(), 2300);
   }
 
-  // the chain buttons for the cards you picked
-  function chainButtons(v) {
-    const m = G.match, idx = G.picks, cards = idx.map(i => v.hand[i]), pos = idx.map(i => i + 1).join(' '), out = [];
-    const hasJ = cards.includes(0);
-    const newSame = m.planChain(null, cards, 0, 'same') && hasJ, newRun = m.planChain(null, cards, 0, 'run') && hasJ;
+  /* ---------------- selecting chain cards, then playing them ---------------- */
+  // Every legal play for the cards you selected, with the chain it would make (asked from the engine: chainOptions, planChain).
+  // added[i]: card i of the result comes from your hand (the others are already on the table).
+  function chainPlans(v) {
+    const m = G.match, idx = G.picks, cards = idx.map(i => v.hand[i]), pos = idx.map(i => i + 1).join(' '), plans = [];
+    if (!cards.length) return plans;
     const opts = m.chainOptions(0, idx);
+    const mk = (act, base, ci, want) => {
+      const plan = m.planChain(base, cards, 0, want || null); if (!plan) return;
+      const made = { cards: plan.cards, kind: plan.kind, jokers: plan.jokers || 0 }, left = {}, old = base ? base.cards : [];
+      old.forEach(c => { left[c] = (left[c] || 0) + 1; });
+      const added = plan.cards.map(c => { if (left[c] > 0) { left[c]--; return false; } return true; });
+      plans.push({ act, ci, want: want || null, base: old.slice(), result: plan.cards.slice(), kind: plan.kind, added, complete: m.isComplete(made, 0), oneAway: m.oneAway(made, 0) });
+    };
     if (opts.some(o => o.type === 'new')) {
-      if (newSame && newRun) {
-        out.push(btn(`chain new ${pos} set`, 'New chain: set', `${cards.map(cardStr).join(' ')} as one number`, { cls: 'go compact' }));
-        out.push(btn(`chain new ${pos} run`, 'New chain: run', `${cards.map(cardStr).join(' ')} in a row`, { cls: 'go compact' }));
-      } else out.push(btn(`chain new ${pos}`, 'Play new chain', cards.map(cardStr).join(' '), { cls: 'go compact' }));
+      const both = cards.includes(0) && m.planChain(null, cards, 0, 'same') && m.planChain(null, cards, 0, 'run');      // Jokers: it could be a set or a run
+      if (both) { mk(`chain new ${pos} set`, null, -1, 'same'); mk(`chain new ${pos} run`, null, -1, 'run'); }
+      else mk(`chain new ${pos}`, null, -1);
     }
-    opts.filter(o => o.type === 'add').forEach(o => out.push(btn(`chain add ${o.ci + 1} ${pos}`, `Add to chain #${o.ci + 1}`, `${v.chains[0][o.ci].cards.map(cardStr).join(' ')} + ${cards.map(cardStr).join(' ')}`, { cls: 'go compact' })));
-    if (!out.length) out.push(btn('chain', 'Not a chain', cards.length < 3 && !v.chains[0].length ? 'A new chain needs 3 or more cards' : 'Same number or in a row', { cls: 'compact', off: true }));
-    return out.join('');
+    opts.filter(o => o.type === 'add').forEach(o => mk(`chain add ${o.ci + 1} ${pos}`, m.chains[0][o.ci], o.ci));
+    return plans;
+  }
+  const chainLabel = pl => pl.kind === 'joker' ? `Joker set of ${pl.result.length}` : pl.kind === 'run' ? `run ${pl.result[0]}–${pl.result[pl.result.length - 1]}` : `set of ${pl.result.length}: ${pl.result[0]}s`;
+  // Why the selected cards can't be played: the chain rules that fail, in the engine's terms (minimum length, one number or in a row,
+  // the most a same-number chain holds, what each chain on the table can take). Returns sentences, the main one first.
+  function whyNotChain(v, cards) {
+    const L = SETTINGS.chain.minLength, c = CHARACTERS[v.chars[0]], K = c.complete, mine = v.chains[0], n = cards.length, out = [];
+    const J = cards.filter(x => x === 0).length, R = cards.filter(x => x !== 0).sort((x, y) => x - y), shown = cards.map(cardStr).join(' ');
+    const jk = J ? ` (even with ${J > 1 ? 'the Jokers' : 'the Joker'})` : '';
+    if (n < L) out.push(`A new chain needs at least ${L} cards: you selected ${n}.`);
+    else if (R.length && R.every(x => x === R[0])) out.push(`A same-number chain can never hold more than ${K.same} cards: you selected ${n}.`);
+    else if (!R.length) out.push(`A Joker set holds at most ${c.jokerWin} Jokers.`);
+    else {
+      const dup = R.find((x, i) => i && x === R[i - 1]), gap = R.findIndex((x, i) => i && x !== R[i - 1] + 1);
+      if (dup !== undefined) out.push(`${shown} is not a new chain${jk}: a run can’t repeat a number (two ${dup}s), and a same-number chain is one number only.`);
+      else if (n > K.runTo - K.runFrom + 1) out.push(`${shown} is not a new chain: the longest run is ${K.runFrom}–${K.runTo}.`);
+      else out.push(`${shown} is not a new chain${jk}: not one number, and not in a row${gap > 0 && !J ? ` (nothing between ${R[gap - 1]} and ${R[gap]})` : ''}.`);
+    }
+    mine.forEach((ch, i) => {
+      const len = ch.cards.length, lo = ch.cards[0], hi = ch.cards[len - 1];
+      let takes;
+      if (ch.kind === 'joker') takes = len >= c.jokerWin ? 'is full' : `takes only Jokers (${c.jokerWin - len} more at most)`;
+      else if (ch.kind === 'same') takes = len >= K.same ? `is full (${K.same} is the most)` : `takes only ${lo}s${c.deck.jokers ? ' or Jokers' : ''} (${K.same - len} more at most)`;
+      else {
+        const ends = [lo > K.runFrom ? lo - 1 : null, hi < K.runTo ? hi + 1 : null].filter(x => x !== null);
+        takes = ends.length ? `grows only from its ends, with no gap: next ${ends.join(' or ')}` : 'is full';
+      }
+      out.push(`Chain #${i + 1} (${ch.kind === 'joker' ? 'Joker set' : ch.cards.join('-')}) ${takes}.`);
+    });
+    return out;
+  }
+  // the preview in the left box: the chain each legal play would make (cards already on the table are plain, the ones you add are
+  // gold), or why the selection can't be played. Nothing here plays anything.
+  function chainPreview(v, plans, kb) {
+    const cards = G.picks.map(i => v.hand[i]), head = `<h4>Preview: not played yet<button type="button" class="linkbtn" data-clear>✕ Clear selection</button></h4>`;
+    if (!plans.length) {
+      const why = whyNotChain(v, cards);
+      return `${head}<div class="cprev bad" data-valid="0"><p class="cpwhy"><b>Can’t be played.</b> ${esc(why[0])}</p>${why.slice(1, 4).map(w => `<p class="cpalt">${esc(w)}</p>`).join('')}</div>`;
+    }
+    const small = plans.length > 1 || plans.some(p => p.result.length > 7);
+    const rows = plans.map(pl => `<div class="cprow" data-act="" data-result="${pl.result.join('-')}" data-added="${pl.result.filter((_, i) => pl.added[i]).join('-')}" data-kind="${pl.kind}">
+        ${plans.length > 1 ? `<span class="cpname">${pl.ci < 0 ? `New ${pl.want === 'run' ? 'run' : pl.want === 'same' ? 'set' : 'chain'}` : `Add to #${pl.ci + 1}`}</span>` : ''}
+        <span class="cpcards">${pl.result.map((n, i) => card(n, { size: small ? 'x' : 's', cls: pl.added[i] ? 'new' : 'old' }).replace('<div ', `<div title="${pl.added[i] ? 'Added from your hand' : 'Already on the table'}" `)).join('')}</span>
+        <span class="cpres">${esc(chainLabel(pl))}</span></div>`).join('').replace(/ data-act=""/g, '');
+    const p0 = plans[0], n = p0.result.length, deckN = v.deck[0], facts = [];
+    if (plans.length === 1) {
+      facts.push(p0.base.length ? `Chain #${p0.ci + 1}: ${p0.base.join('-')} on the table + your ${p0.result.filter((_, i) => p0.added[i]).join(', ')} = ${p0.result[0] === p0.result[n - 1] ? p0.result.join('-') : `${p0.result[0]}–${p0.result[n - 1]}`}.` : `A new chain of ${n} from your hand.`);
+      facts.push(`To stop it they discard ${plural(n, 'card')} (they hold ${v.oppHand}${v.oppHand < n ? ': too few' : ''}). ${kb ? 'If it lands: no Charge, you name their weak point.' : `If it lands: your Charge, up to ${n} dice.`}`);
+      if (p0.complete) facts.push(`Completes the chain: after this play it leaves the table and its ${n} cards are shuffled back into your deck (${deckN} → ${deckN + n}).`);
+      else if (p0.oneAway) facts.push(p0.kind === 'joker' ? 'One Joker from winning the match.' : 'One card from complete.');
+    } else facts.push('More than one play fits these cards: pick one of the Play buttons.');
+    const key = plans.some(p => p.base.length) ? `<p class="cpkey"><i class="old"></i>already on the table<i class="new"></i>added from your hand</p>` : '';
+    return `${head}<div class="cprev" data-valid="1">${rows}${key}${facts.map(x => `<p class="cpfact">${esc(x)}</p>`).join('')}</div>`;
+  }
+  // step 2 of 2: the buttons that really play the selected cards (one per legal play), or a greyed one saying why not
+  function chainButtons(v, plans, kb) {
+    if (!plans.length) return btn('chain', 'Can’t play these cards', esc(whyNotChain(v, G.picks.map(i => v.hand[i]))[0]), { cls: 'compact noplay', off: true });
+    if (plans.length === 1) {
+      const pl = plans[0];
+      return btn(pl.act, kb ? 'Play Killing Blow chain' : 'Play selected chain', `${pl.ci < 0 ? 'New chain' : `Add to chain #${pl.ci + 1}`}: ${esc(chainLabel(pl))}${pl.complete ? ' · completes it' : ''}`, { cls: 'go compact playchain' });
+    }
+    return plans.map(pl => btn(pl.act, pl.ci < 0 ? `Play new ${pl.want === 'run' ? 'run' : pl.want === 'same' ? 'set' : 'chain'}` : `Play: add to #${pl.ci + 1}`, esc(chainLabel(pl)), { cls: 'go compact playchain' })).join('');
+  }
+  // the bar a decision would change, and the value it would fall to (shown as a marker on that bar)
+  function previewFor(d, v) {
+    if (d.kind === 'charge') {
+      const m = d.prompt.match(/\(highest (\d+)\)/), dmg = Math.max(0, sumOf(v.d8[0]) - (m ? Number(m[1]) : 0)), to = Math.max(0, v.bars[1].shield - dmg);
+      return { p: 1, bar: 'shield', to, tip: `If you attack now: their Shield ${v.bars[1].shield} → ${to}` };
+    }
+    if (d.kind === 'keep') {
+      const m = d.prompt.match(/rolled d\d+: ((?:\d+:\d+\s*)+)/); if (!m) return null;
+      const hi = Math.max(...m[1].trim().split(/\s+/).map(x => Number(x.split(':')[1]))), dmg = Math.max(0, sumOf(v.d8[1]) - hi), to = Math.max(0, v.bars[0].shield - dmg);
+      return { p: 0, bar: 'shield', to, tip: `If they attack now: your Shield ${v.bars[0].shield} → ${to}` };
+    }
+    return null;
+  }
+
+  /* ---------------- a completed chain goes back into the deck ---------------- */
+  // The engine's sentence tells it all (whose chain, its cards, the deck afterwards). The chain's cards fly from the table to that
+  // player's deck count, a band says what happened, and the count goes up. Shown for both players.
+  async function recycleScene(raw, prev, now, t) {
+    const m = raw.match(/^Player (\d)'s chain ([\d-]+) is complete: it leaves the table and its (\d+) cards are shuffled back into Player \d's deck \((\d+) cards\)\./);
+    const arena = one('#arena');
+    if (m) G.recycleTip = { p: m[1] - 1, n: Number(m[3]), deck: Number(m[4]) };
+    if (!m || !arena || !(t > 0)) { G.held = null; renderGauges(); return; }      // Skip and the quick self-play test: no scene, no wait
+    const p = m[1] - 1, mine = p === 0, cards = m[2].split('-').map(Number), n = Number(m[3]), deck = Number(m[4]), big = cards.length > 8;
+    all('.recyc, .popnote', arena).forEach(x => x.remove());
+    const el = document.createElement('div');
+    el.className = `recyc ${mine ? 'mine' : 'theirs'}`; el.setAttribute('role', 'status'); el.style.setProperty('--t', t);
+    el.dataset.player = p; el.dataset.deck = deck; el.dataset.cards = n;
+    el.innerHTML = `<b class="rtitle">Chain complete!</b><span class="rcards${big ? ' many' : ''}">${cards.map(c => card(c, { size: big ? 'x' : 's' })).join('')}</span>
+      <span class="rline">${mine ? 'Your' : esc(nameOf(p)) + '’s'} chain leaves the table: its ${plural(n, 'card')} are shuffled back into ${mine ? 'your' : 'their'} deck</span>
+      <span class="rdeck">${pic('deck', 3)}${mine ? 'Your deck' : 'Their deck'} <b>${deck - n}</b> → <b>${deck}</b></span>`;
+    el.onclick = () => { el._hurry = true; };
+    arena.appendChild(el);
+    // the cards fly from the chain's place on the table to the deck count under that player's bars
+    const fly = [], table = one('#t' + p), ci = prev ? prev.chains[p].findIndex(c => c.complete) : -1;
+    const from = (table && ci >= 0 && all('.tchain', table)[ci]) || table, to = one('#g' + p + ' .deckchip');
+    if (!stillMotion() && from && to) {
+      const a = arena.getBoundingClientRect(), z = a.width / arena.offsetWidth || 1;
+      const mid = x => { const r = x.getBoundingClientRect(); return { x: (r.left - a.left + r.width / 2) / z, y: (r.top - a.top + r.height / 2) / z }; };
+      const A = mid(from), B = mid(to);
+      cards.forEach((c, i) => {
+        const holder = document.createElement('div'); holder.className = 'flycard'; holder.innerHTML = card(c, { size: 's' });
+        const sx = A.x + (i - (cards.length - 1) / 2) * 14; holder.style.left = sx + 'px'; holder.style.top = A.y + 'px';
+        arena.appendChild(holder); fly.push(holder);
+        const dx = B.x - sx, dy = B.y - A.y;
+        holder.animate([{ transform: 'translate(-50%, -50%) scale(1.2) rotate(0deg)', opacity: 1 },
+          { transform: `translate(calc(-50% + ${dx * .5}px), calc(-50% + ${dy * .5 - 50}px)) scale(1.4) rotate(${(i % 2 ? 1 : -1) * 180}deg)`, opacity: 1, offset: .5 },
+          { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(.6) rotate(${(i % 2 ? 1 : -1) * 360}deg)`, opacity: 1, offset: .92 },
+          { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(.3)`, opacity: 0 }],
+        { duration: 620 * t, delay: (260 + i * 45) * t, easing: 'cubic-bezier(.4, 0, .6, 1)', fill: 'both' });
+      });
+    }
+    await sceneWait(el, 900 + cards.length * 45, t);            // the cards are on their way
+    G.held = null; renderGauges();                              // they arrive: the chain is off the table, the deck count goes up
+    const chip = one('#g' + p + ' .deckchip'); if (chip) { chip.classList.add('gain'); chip.dataset.gain = '+' + n; }
+    el.classList.add('s2');
+    await sceneWait(el, 1300, t);
+    el.classList.add('out');
+    await sceneWait(el, 180, t);
+    el.remove(); fly.forEach(x => x.remove());
+    const c2 = one('#g' + p + ' .deckchip'); if (c2) c2.classList.remove('gain');
+  }
+
+  /* ---------------- first-match tips ---------------- */
+  // Short, dismissible, shown once each at the first decision they are about (a chain you can play, your first Charge, the first
+  // completed chain). Remembered on this device; the "Tips" button in the top bar turns them off, or on again from the start.
+  // Never shown at speed 0 (the quick self-play test), and they never block a click.
+  const TIPS = { on: true, seen: {} };
+  try {
+    if (localStorage.getItem('break-tips-on') === '0') TIPS.on = false;
+    JSON.parse(localStorage.getItem('break-tips-seen') || '[]').forEach(id => { TIPS.seen[id] = true; });
+  } catch (e) { /* no storage: tips on, none seen */ }
+  const saveTips = () => { try { localStorage.setItem('break-tips-on', TIPS.on ? '1' : '0'); localStorage.setItem('break-tips-seen', JSON.stringify(Object.keys(TIPS.seen))); } catch (e) { /* not remembered */ } };
+  function tipText(id, x) {
+    const v = G.view, L = SETTINGS.chain.minLength;
+    if (id === 'chain') return { title: x ? 'Tip: the Killing Blow chain' : 'Tip: playing a chain', lines: [
+      `<b>1 Select</b> the gold cards (or press “${x ? 'Select Killing Blow cards' : 'Select chain cards'}”). Nothing is played yet.`,
+      '<b>2 Check</b> the preview: this box shows the chain they would make.',
+      `<b>3 Play</b> it with “${x ? 'Play Killing Blow chain' : 'Play selected chain'}”, instead of a move.`,
+      `A chain: ${L}+ cards of one number or in a row. They can stop it by discarding as many cards. If it lands, ${x ? 'you name their weak point' : 'your Charge hits their Shield'}.`] };
+    if (id === 'charge') return { title: 'Tip: your Charge', lines: [
+      '<b>Attack now:</b> your pool total minus their highest escape die hits their Shield. It spends your dice and ends the Charge.',
+      `<b>Charge again:</b> one more die (at most one per chain card), but they roll their escape dice again. If all of them match, the chain breaks: no attack, their Break refills to ${v.max[1].break}, and you keep your pool for your next Charge.`] };
+    if (id === 'recycle') { const K = CHARACTERS[v.chars[x.p]].complete, mine = x.p === 0; return { title: 'Tip: a completed chain', lines: [
+      `${mine ? 'Your' : esc(nameOf(x.p)) + '’s'} chain was complete (${K.same} of one number, or the full run ${K.runFrom}–${K.runTo}), so it left the table and its ${plural(x.n, 'card')} were shuffled back into ${mine ? 'your' : 'their'} deck (now ${x.deck}).`,
+      `<b>Watch the deck count under the bars.</b> ${DRAW_MOVES.map(k => MOVE_NAME[k]).join(' and ')} draw from it, and a deck that reaches 0 loses the match. Completing a chain is the only way to refill it.`] }; }
+    return null;
+  }
+  // show tip `id` if it is due; returns true when it is (or already was) on screen
+  function coach(id, x) {
+    const el = one('#coach'); if (!el || !G) return false;
+    if (G.coachNow === id) return true;
+    if (!TIPS.on || !(speed > 0) || TIPS.seen[id] || G.coachNow) return false;
+    const tip = tipText(id, x); if (!tip) return false;
+    TIPS.seen[id] = true; saveTips(); G.coachNow = id;
+    el.dataset.tip = id; el.hidden = false; el.style.zoom = '';
+    el.innerHTML = `<h4>${pic('rules', 2)}${tip.title}</h4><div class="cbody">${tip.lines.map(l => `<p>${l}</p>`).join('')}</div>
+      <div class="cbtns"><button type="button" class="chip go" data-coach="ok">Got it</button><button type="button" class="linkbtn" data-coach="off">Turn tips off</button></div>`;
+    // text-fit: the tip always stays inside its box
+    const body = one('.cbody', el); for (let f = 15; f > 11 && el.scrollHeight > el.clientHeight + 1; f -= .5) body.style.fontSize = f + 'px';
+    return true;
+  }
+  function coachHide() { const el = one('#coach'); if (el) { el.hidden = true; el.innerHTML = ''; } if (G) G.coachNow = null; }
+  function coachClick(what) {
+    if (what === 'off') { TIPS.on = false; saveTips(); showTips(); }
+    sfx('button'); coachHide();
+  }
+  function showTips() { const b = one('#tips'); if (b) { b.textContent = `Tips: ${TIPS.on ? 'on' : 'off'}`; b.setAttribute('aria-pressed', String(TIPS.on)); b.title = TIPS.on ? 'First-match tips are on. Click to turn them off.' : 'Click to show the first-match tips again, from the start.'; } }
+  // the Tips button: off hides them; on shows every tip again, starting with the decision on screen
+  function toggleTips() {
+    TIPS.on = !TIPS.on; if (TIPS.on) TIPS.seen = {};
+    saveTips(); showTips();
+    if (!TIPS.on) coachHide(); else if (pending) render();
   }
 
   /* ---------------- the end of the match ---------------- */
   function showEnd(r) {
-    const v = G.view, w = r.winner;
+    G.preview = null; G.held = null; coachHide();
+    const v = G.view = snapshot(G.match), w = r.winner;
     setMode('kb');
     renderGauges();
     one('#turn').style.display = 'none';
@@ -3629,7 +4072,7 @@ return { playRecipe, recipeDur, SOUNDS };
 
   async function showSelect() {
     if (G) { G.token = {}; G.skip = true; }           // stop any match in progress (and its sounds)
-    pending = null; sfxStop();
+    pending = null; sfxStop(); coachHide();
     await Promise.all(ROSTER.map(loadArt));
     const frame = one('#frame');
     const tile = (row, k) => `<button type="button" class="tile${pickState[row] === k ? ' on' : ''}" data-row="${row}" data-key="${k}" aria-pressed="${pickState[row] === k}">
@@ -3670,6 +4113,8 @@ return { playRecipe, recipeDur, SOUNDS };
     vr.oninput = () => { SND.vol = Math.max(0, Math.min(100, Number(vr.value) || 0)); try { if (SND.master) SND.master.gain.setTargetAtTime(volGain(), SND.ctx.currentTime, .02); } catch (e) { /* no audio */ } saveSound(); };
     vr.onchange = () => { audioOn(); sfx('button', { gap: 150 }); };      // a click at the new volume
     showSound();
+    one('#volBox').insertAdjacentHTML('afterend', '<button class="chip" id="tips" type="button"></button>');
+    one('#tips').onclick = toggleTips; showTips();
     // every click: wake the audio; a button that made no sound of its own gets the plain button click
     document.addEventListener('click', () => { SND.click = { sounded: false }; audioOn(); }, true);
     document.addEventListener('click', e => {
@@ -3685,7 +4130,20 @@ return { playRecipe, recipeDur, SOUNDS };
     setSpeed(x) { speed = x; },
     // for checking the sounds: ARENA.sound.record() starts a list of every sound that starts (id, time), ARENA.sound.log reads it
     sound: { sfx, announce, stop: sfxStop, record(on = true) { SND.log = on ? [] : null; }, get log() { return SND.log; }, get on() { return SND.on; }, get volume() { return SND.vol; }, get ctx() { return SND.ctx; }, ids: HAVE_SFX ? Object.keys(SFX.SOUNDS) : [] },
-    scenes: { breakScene, stopScene, formScene, showRoll },      // for checking a scene on its own
+    scenes: { breakScene, stopScene, formScene, showRoll, recycleScene },      // for checking a scene on its own
+    // for the UI checks (tests/ui-checks.html): read-only helpers, plus a way to start a match and to ask the engine again for
+    // the duel decision after a check has set the match up (hand, bars, deck) the way it needs
+    test: {
+      objective, whyNotChain, lostNote, attackFirst, playEvents, tips: TIPS, toggleTips, drawsOf,
+      get speed() { return speed; },
+      start(mine, theirs) { pending = null; pickState.mine = mine; pickState.theirs = theirs; return startMatch(mine, theirs); },
+      plans() { return chainPlans(G.view); },
+      redecide() {
+        if (!pending || pending.d.kind !== 'duel') return false;
+        pending = { d: G.match.duelDecision(0), resolve: pending.resolve, signed: true };
+        G.view = snapshot(G.match); G.picks = []; G.error = ''; G.armed = null; coachHide(); render(); return true;
+      },
+    },
     async autoplay(maxSteps = 200000) {
       const me = makeBots(1, Math.random)[0], seen = {};
       for (let i = 0; i < maxSteps; i++) {
