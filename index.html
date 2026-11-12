@@ -1226,6 +1226,44 @@ svg.radar { flex: 1; min-height: 0; width: 100%; display: block; }
 .select.pick .selbar #fight { width: 100%; }
 .select.pick .selbar #spicy { justify-self: end; margin: 0; width: 220px; }
 
+/* ---- the Gunner's charge: the revealed round as move tiles, what keeping it does, the charge pips ---- */
+.mvrow { display: flex; align-items: stretch; justify-content: center; gap: 8px; margin-top: 2px; }
+.mvtile { position: relative; flex: none; width: 142px; height: 86px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; background: #e3f0fc; box-shadow: var(--notch-3), inset 0 0 0 2px #8fd0fa; }
+.mvtile small { font: 800 13px/1.15 var(--f-text); color: var(--dim); white-space: nowrap; }
+.mvtile b { font: 400 26px/1 var(--f-label); color: var(--text); }
+.mvtile .spr { flex: none; }
+.mvtile.won { background: linear-gradient(#fff3b8, #ffd76a); box-shadow: var(--notch-3), inset 0 0 0 2px #fff3b8, 0 0 0 4px #ffbe1f; }
+.mvtile.lost { background: #dfe6ee; box-shadow: var(--notch-3); }
+.mvtile.lost .spr, .mvtile.lost b { opacity: .55; }
+.mvbadge { position: absolute; right: 3px; top: 3px; padding: 2px 7px 3px; font: 400 17px/1 var(--f-label); color: #fff; background: #2f9a35; box-shadow: var(--notch-3); }
+.mvvs { flex: none; width: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+.mvvs b { font: 400 40px/1 var(--f-label); }
+.mvvs small { font: 800 13px/1 var(--f-text); color: var(--dim); white-space: nowrap; }
+.mvvs.win b { color: #2f9a35; } .mvvs.lose b { color: #c22a26; } .mvvs.tie b { color: #4f6f80; }
+.mvres { margin: 7px 0 0; text-align: center; font: 400 24px/1 var(--f-label); }
+.mvres.win { color: #1f7a26; } .mvres.lose { color: #b3241f; } .mvres.tie { color: #4f6f80; }
+.mvdo { margin: 2px 0 0; padding: 0; list-style: none; display: grid; gap: 5px; font: 700 15px/1.25 var(--f-text); color: var(--text); }
+.mvdo li { padding-left: 12px; border-left: 5px solid #b9c6e6; }
+.mvdo li.good { border-color: #4fc23f; } .mvdo li.bad { border-color: #e8443a; } .mvdo li.fire { border-color: #ff8a3a; }
+.mvdo li.cards, .mvdo li.note { color: var(--dim); }
+.mvdo b { font-weight: 800; }
+.mvdo strong { font: 400 22px/1 var(--f-label); margin-left: 2px; white-space: nowrap; }
+.mvdo .tag.why { margin-left: 6px; font-size: 15px; background: #1f5fa8; color: #fff8e0; white-space: nowrap; }
+.rrdice { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: 2px; }
+.rrdice .row { justify-content: center; width: 100%; }
+.rrdice .row.m { flex-wrap: nowrap; }
+.rrdice .row.s .card.die.coin { width: 40px; height: 40px; }
+.rrdice .tag.dsize { margin: 0; }
+.rrtotal { margin-left: 8px; white-space: nowrap; font: 400 24px/1 var(--f-label); color: var(--text); } .rrtotal b { font: 400 30px/1 var(--f-label); }
+.gpips { display: flex; align-items: center; gap: 7px; height: 26px; padding: 0 2px; color: var(--text); white-space: nowrap; }
+.gpips .spr { flex: none; }
+.gpips .gpl { font: 400 20px/1 var(--f-label); }
+.gpips .gpp { display: flex; gap: 4px; }
+.gpips .gpp i { width: 16px; height: 16px; background: #dfe6ee; box-shadow: 0 0 0 2px var(--ink); transform: rotate(45deg) scale(.8); }
+.gpips .gpp i.on { background: #1fe0ff; }
+.gpips b { font: 400 19px/1 var(--f-label); }
+.gpips small { margin-left: auto; font: 800 13px/1 var(--f-text); color: var(--dim); }
+
 </style>
 </head>
 <body>
@@ -1360,7 +1398,8 @@ class Match {
     this.buff = [null, null];        // Vampire: { break, shield, last } buffs unlocked (null for other characters)
     this.breakCut = [0, 0];          // Cavalryman: how much each player's maximum Break has been lowered
     this.extraDie = [null, null];
-    this.kbReady = [false, false];   // rules 1.39: may make a Killing Blow chain this round (the opponent's Last was 0 at the end of last round)
+    this.kbReady = [false, false];
+    this.lastHitter = null;          // rules 1.40: who landed the last duel hit (picks first each round); null = nobody yet (Player 1 first)   // rules 1.39: may make a Killing Blow chain this round (the opponent's Last was 0 at the end of last round)
     this.gCharges = [0, 0];          // Sci-fi Gunner: charges left (set once the characters are known)    // Cavalryman's extra duel die: null, "before" (gained before his own Shield emptied: doubled with comeback) or "after" (double, then +1)
     this.pl = [0, 1].map(() => ({ hand: [], weak: null, deck: [], discard: [] }));   // decks are built once the characters are known
     this.chains = [[], []];          // each: { cards, kind, chained }
@@ -1685,17 +1724,22 @@ class Match {
   async turn() {
     let a, b, replayed = false;
     const lastBefore = this.bars.map(x => x.last);
+    // Rules 1.40: the player who landed the last duel hit picks first (Player 1 until anyone has); if they play a chain, the other makes
+    // no choice that round; if the second player plays a chain, the first player's secret pick is cancelled
+    const first = this.lastHitter ?? 0, second = 1 - first;
     while (true) {
-      const da = this.duelDecision(0);
-      if (da.onlyBlock) this.metrics.onlyBlockRounds[0]++;
-      a = await this.ask(0, da);
-      this.noteKey(0, a);
-      if (a.value.type !== "move") { this.repMove = null; this.repCount = 0; await this.special(0, a.value); return this.endOfChainRound(lastBefore); }
-      const db = this.duelDecision(1);
-      if (db.onlyBlock) this.metrics.onlyBlockRounds[1]++;
-      b = await this.ask(1, db);
-      this.noteKey(1, b);
-      if (b.value.type !== "move") { this.repMove = null; this.repCount = 0; this.say(`${NAME(1)} acts instead of a move, so ${NAME(0)}'s secret pick is cancelled.`); await this.special(1, b.value); return this.endOfChainRound(lastBefore); }
+      const picks = [null, null];
+      const df = this.duelDecision(first);
+      if (df.onlyBlock) this.metrics.onlyBlockRounds[first]++;
+      picks[first] = await this.ask(first, df);
+      this.noteKey(first, picks[first]);
+      if (picks[first].value.type !== "move") { this.repMove = null; this.repCount = 0; await this.special(first, picks[first].value); return this.endOfChainRound(lastBefore); }
+      const ds = this.duelDecision(second);
+      if (ds.onlyBlock) this.metrics.onlyBlockRounds[second]++;
+      picks[second] = await this.ask(second, ds);
+      this.noteKey(second, picks[second]);
+      if (picks[second].value.type !== "move") { this.repMove = null; this.repCount = 0; this.say(`${NAME(second)} acts instead of a move, so ${NAME(first)}'s secret pick is cancelled.`); await this.special(second, picks[second].value); return this.endOfChainRound(lastBefore); }
+      [a, b] = picks;
       // Sci-fi Gunner: a charge can replay a revealed duel round (once per round): both players pick again
       if (replayed || !(await this.offerReplay([a.value.key, b.value.key]))) break;
       replayed = true;
@@ -1839,6 +1883,7 @@ class Match {
     if (a === b) text = `${NAME(0)} and ${NAME(1)} both played ${M[a].name}: nothing happens.`;
     else {
       const w = M[a].beats === b ? 0 : 1, l = 1 - w, m = M[mv[w].key];
+      this.lastHitter = w;                       // rules 1.40: the last duel hit decides who picks first next round
       const head = `${NAME(0)} played ${M[a].name}, ${NAME(1)} played ${M[b].name}.`;
       // every win hits the loser's current bar (Basic 1 die, Heavy 2 dice, Block 1 die); Block also regains unless the blocker's bar is full
       const regain = m.heals ? this.ch(w).blockRegain : 0, healBar = this.currentBar(w), canHeal = !!regain && !this.barFull(w);
@@ -3871,7 +3916,7 @@ const BOT_ROSTER = [{"id":55,"name":"Bot56","moves":"blockHeavy","chainStyle":"l
     else if (!(['killing-blow', 'replay', 'reroll'].includes(d.kind) || action === 'keep all') || action === 'replay' || action === 'reroll') quietClick();      // what it does is heard at once
     if (d.kind === 'duel' && r.value.type === 'move') G.lastMoves[0] = r.value.key;
     if (d.kind === 'keep') G.kept = r.value;
-    one('#dAct').innerHTML = ''; one('#turn').style.display = 'none';
+    one('#dAct').innerHTML = ''; one('#turn').style.display = 'none'; dropReveal();
     G.preview = null; coachHide();
     all('.chainsign').forEach(x => x.remove());
     resolve({ ...r, action });
@@ -3902,6 +3947,69 @@ const BOT_ROSTER = [{"id":55,"name":"Bot56","moves":"blockHeavy","chainStyle":"l
     }
     render();
   }
+  /* ---------------- the Gunner's charge: what a revealed round or a roll would do ---------------- */
+  const MOVE_ICON = { basic: 'sword', heavy: 'hammer', block: 'shield' };
+  // What the revealed duel round does if it stands, worked out from the match as the engine will (resolveDuel): who wins, the bar
+  // hit, how many dice of what size (comeback, Power, the Cavalryman's extra die and bigger or smaller dice included), a winning
+  // Block's heal, Fire on the moves picked, and each side's card effect. Nothing is rolled or changed here.
+  function duelOutcome(m, me, mine, theirs) {
+    const M = SETTINGS.moves, keys = me === 0 ? [mine, theirs] : [theirs, mine];
+    const w = keys[0] === keys[1] ? null : (M[keys[0]].beats === keys[1] ? 0 : 1), out = { keys, winner: w, hit: null, heal: null, fire: [], cards: [] };
+    if (w !== null) {
+      const l = 1 - w, mv = M[keys[w]], demonic = m.form[w] === 'demonic';
+      const comeback = m.bars[w].shield === 0 ? (demonic ? 3 : SETTINGS.comebackDice) : 1;
+      const base = (mv.dice || mv.hitDice) + m.power[w], xd = m.extraDie[w];
+      const n = xd === 'before' ? (base + 1) * comeback : xd === 'after' ? base * comeback + 1 : base * comeback, bar = m.currentBar(l);
+      const why = [];
+      if (comeback > 1) why.push(demonic ? 'Demonic: triple dice' : 'comeback: double dice');
+      if (m.power[w]) why.push(`Power +${m.power[w]}`);
+      if (xd) why.push('extra die');
+      out.hit = { by: w, target: l, bar, left: m.bars[l][bar], n, sides: m.sides(w, 'duel'), why };
+      if (mv.heals) { const amount = m.ch(w).blockRegain, hb = m.currentBar(w); if (amount) out.heal = { by: w, bar: hb, amount, full: m.barFull(w) }; }
+    }
+    [0, 1].forEach(p => { const st = m.fire[p][keys[p]]; if (st) out.fire.push({ p, key: keys[p], stacks: st, bar: m.currentBar(p) }); });
+    [0, 1].forEach(p => { const e = M[keys[p]], P = m.pl[p]; out.cards.push(e.draw ? 'draw' : e.effect === 'swap' ? (P.hand.length && P.discard.length ? 'swap' : 'noswap') : e.effect === 'cycle' ? (P.hand.length ? 'cycle' : 'none') : 'none'); });
+    return out;
+  }
+  const CARD_FX = { draw: 'draw 1', swap: 'swap a card', noswap: 'no swap (empty discard pile)', cycle: 'discard 1, draw 1', none: 'no card effect' };
+  function outcomeLines(o, me, theirName) {
+    const who = p => p === me ? 'You' : theirName, whose = p => p === me ? 'your' : 'their', L = [];
+    if (o.hit) { const h = o.hit; L.push({ cls: h.by === me ? 'good hit' : 'bad hit', html: `<b>${h.by === me ? 'You hit' : `${theirName} hits`} ${whose(h.target)} ${BAR_NAME[h.bar]}</b> (${h.left} left): <strong class="mvdice" data-n="${h.n}" data-sides="${h.sides}">${h.n} × d${h.sides}</strong>${h.why.map(x => `<span class="tag why">${x}</span>`).join('')}` }); }
+    else L.push({ cls: 'tie hit', html: '<b>No hit</b>: both played the same move.' });
+    if (o.heal) L.push({ cls: (o.heal.by === me ? 'good' : 'bad') + ' heal', html: o.heal.full ? `${who(o.heal.by)}${o.heal.by === me ? 'r' : '’s'} ${BAR_NAME[o.heal.bar]} is full: no Block heal.` : `<b>${o.heal.by === me ? 'You heal' : `${theirName} heals`} ${o.heal.amount} ${BAR_NAME[o.heal.bar]}</b> (Block).` });
+    o.fire.forEach(f => L.push({ cls: (f.p === me ? 'bad' : 'good') + ' fire', html: `<b>Fire ×${f.stacks}</b>: ${f.p === me ? 'your' : `${theirName}’s`} ${MOVE_NAME[f.key]} burns ${f.p === me ? 'you' : 'them'} for ${f.stacks} on ${whose(f.p)} ${BAR_NAME[f.bar]}.` }));
+    L.push({ cls: 'cards', html: `Cards: you ${CARD_FX[o.cards[me]]} · ${theirName}: ${CARD_FX[o.cards[1 - me]]}.` });
+    return L;
+  }
+  // a roll the Gunner may re-roll: what it does as it stands (c: the engine's own figures for the roll)
+  function rerollLines(m, me, c, theirName) {
+    const rolls = c.rolls || [], total = rolls.reduce((a, b) => a + b, 0), roller = c.own ? me : 1 - me, L = [], whose = p => p === me ? 'your' : 'their', n = rolls.length;
+    if (c.kind === 'duel') {
+      const after = Math.max(0, c.barLeft - total);
+      L.push({ cls: (c.own ? 'good' : 'bad') + ' hit', html: `<b>${c.own ? 'You hit' : `${theirName} hits`} ${whose(c.target)} ${BAR_NAME[c.bar]} for ${total}</b>: <strong class="eff">${c.barLeft} → ${after}</strong>${after === 0 && c.barLeft > 0 ? `<span class="tag why">${BAR_NAME[c.bar]} empty</span>` : ''}` });
+    } else if (c.kind === 'charge die') {
+      L.push({ cls: (c.own ? 'good' : 'bad') + ' hit', html: `<b>+${total} to ${c.own ? 'your' : `${theirName}’s`} charge pool</b>: <strong class="eff">${c.pool} → ${c.pool + total}</strong>` });
+      L.push({ cls: 'note', html: `${roller === me ? 'Their' : 'Your'} Shield has ${c.shieldLeft} left.` });
+    } else {
+      const hi = Math.max(...rolls), dmg = Math.max(0, c.pool - hi), def = roller;
+      if (c.matched) L.push({ cls: (c.own ? 'good' : 'bad') + ' hit', html: `<b>All ${n} match: the chain breaks.</b> No attack, and ${whose(def)} Break refills.` });
+      else L.push({ cls: (c.own ? 'bad' : 'good') + ' hit', html: `<b>No match: the chain holds.</b> An attack now would do <strong class="eff">${c.pool} − ${hi} = ${dmg}</strong> to ${whose(def)} Shield (${c.shieldLeft} left).` });
+    }
+    L.push({ cls: 'note', html: `A re-roll rolls ${n > 1 ? `all ${n}` : 'the'} d${c.sides}${n > 1 ? '' : ''} again: it could be better or worse.` });
+    return L;
+  }
+  // the Gunner's charges as pips: filled = left, empty = spent
+  function chargePips(v, p, note) {
+    const total = CHARACTERS[v.chars[p]].gunnerCharges || v.gCharges[p], left = v.gCharges[p];
+    return `<div class="gpips" data-left="${left}" data-total="${total}" role="img" aria-label="Gunner charges: ${left} of ${total} left">${pic('bolt', 2)}<span class="gpl">Gunner charge</span><span class="gpp">${Array.from({ length: total }, (_, i) => `<i${i < left ? ' class="on"' : ''}></i>`).join('')}</span><b>${left} of ${total} left</b><small>${note}</small></div>`;
+  }
+  // the two revealed moves stay over the fighters while the Gunner decides
+  function holdReveal(a, b) {
+    const el = one('#reveal'); if (!el) return;
+    el.innerHTML = `<span>${a}</span><i>vs</i><span>${b}</span>`; clearTimeout(el._t); el.classList.add('on'); el._hold = true;
+  }
+  function dropReveal() { const el = one('#reveal'); if (el && el._hold) { el._hold = false; el.classList.remove('on'); } }
+
   const btn = (act, title, sub, o = {}) => `<button type="button" class="btn ${o.cls || ''}${o.icon ? ' icon' : ''}${o.off ? ' off' : ''}" data-act="${esc(act)}"${o.warn ? ' data-warn' : ''}${o.off ? ' aria-disabled="true"' : ''}>${o.icon ? pic(o.icon, 3) : ''}<b>${title}</b>${sub ? `<small>${sub}</small>` : ''}</button>`;
   const more = (label, lines) => `<details class="more"><summary>${label}</summary><div class="body">${lines.map(l => `<p>${l}</p>`).join('')}</div></details>`;
   // o.chain (from chainHints): cards that can go into a chain are gold, the suggested ones pulse, the rest are dimmed
@@ -4088,18 +4196,29 @@ const BOT_ROSTER = [{"id":55,"name":"Bot56","moves":"blockHeavy","chainStyle":"l
         act.innerHTML = MOVES.map((k, i) => btn(`${d.kind} ${k}`, MOVE_NAME[k], fz ? (v.frozen[them][k] ? `Already frozen (${v.frozen[them][k]})` : '') : (v.fire[them][k] ? `Fire ×${v.fire[them][k]} now` : ''), { cls: (i ? '' : 'main') + ' compact' })).join('') + err;
         break;
       }
-      case 'replay':
+      case 'replay': {
+        // the Gunner's replay: the revealed round as two move tiles with who wins, what keeping it would do, and the two choices
+        const c = d.ctx || {}, o = duelOutcome(G.match, me, c.mine, c.theirs), mineWin = o.winner === me, tie = o.winner === null;
+        setPrompt('Gunner charge', tie ? 'The round is revealed: a tie. Replay it, or keep it?' : `The round is revealed: ${mineWin ? 'you win it' : theirName + ' wins it'}. Replay it, or keep it?`);
+        holdReveal(MOVE_NAME[c.mine], MOVE_NAME[c.theirs]);
+        const tile = (key, who, won, lost) => `<div class="mvtile${won ? ' won' : lost ? ' lost' : ''}" data-move="${key}"><small>${who}</small>${pic(MOVE_ICON[key], 4)}<b>${MOVE_NAME[key]}</b>${won ? '<span class="mvbadge">Wins</span>' : ''}</div>`;
+        info.innerHTML = `<h4>The round, revealed</h4><div class="mvrow" data-result="${tie ? 'tie' : mineWin ? 'me' : 'them'}">${tile(c.mine, 'You', mineWin, !tie && !mineWin)}
+          <div class="mvvs ${tie ? 'tie' : mineWin ? 'win' : 'lose'}"><b>${tie ? '=' : mineWin ? '▶' : '◀'}</b><small>${tie ? 'a tie' : 'beats'}</small></div>${tile(c.theirs, theirName, !tie && !mineWin, mineWin)}</div>
+          <p class="mvres ${tie ? 'tie' : mineWin ? 'win' : 'lose'}">${tie ? 'A tie: nobody hits' : mineWin ? 'You win the round' : `${theirName} wins the round`}</p>`;
+        hand.innerHTML = `<h4>If you keep it</h4><ul class="mvdo">${outcomeLines(o, me, theirName).map(l => `<li class="${l.cls}">${l.html}</li>`).join('')}</ul>`;
+        act.innerHTML = chargePips(v, me, 'Replay costs 1 charge') + btn('replay', 'Replay the round', 'Both pick again · nothing happens this round', { cls: 'main mid compact' })
+          + btn('keep', 'Keep the result', 'Save the charge', { cls: 'mid compact' }) + err;
+        break;
+      }
       case 'reroll': {
-        const left = v.gCharges[me];
-        setPrompt('Gunner charge', `${plural(left, 'charge')} left this match.`);
-        const c = d.ctx || {}, coin = c.sides === 2;
-        // a re-roll: the roll in question is drawn as dice (a d2 as coins), with its size
-        if (d.kind === 'reroll' && c.rolls) info.innerHTML = `<h4>Gunner charge</h4><div class="row"><span class="tag dsize">${coin ? 'coin (d2)' : 'd' + c.sides}</span>${c.rolls.map(x => die(x, { cls: coin ? 'coin' : c.kind === 'charge die' ? 'd8' : '' })).join('')}</div>`
-          + `<p>${c.own ? 'Your' : theirName + '’s'} ${c.kind === 'duel' ? 'duel damage' : c.kind === 'charge die' ? 'charge die' : 'escape dice'} roll.</p><p class="dim">Roll all of it again (once), or keep it.</p>`;
-        else info.innerHTML = `<h4>Gunner charge</h4><p>${esc(tell(d.prompt.replace(/^GUNNER CHARGE \(\d+ left\): /, '')))}</p>`;
-        hand.innerHTML = `<h4>Your hand</h4>${handHtml(v)}`;
-        act.innerHTML = (d.kind === 'replay' ? btn('replay', 'Replay the round', 'Both pick again', { cls: 'main mid' }) : btn('reroll', 'Re-roll it', 'Roll the whole roll again', { cls: 'main mid' }))
-          + btn('keep', 'Keep it', 'Save the charge', { cls: 'mid' }) + err;
+        // the Gunner's re-roll: the roll in question as dice (a d2 as coins) with its size and total, what it does as it stands, and the two choices
+        const c = d.ctx || {}, coin = c.sides === 2, rolls = c.rolls || [], total = rolls.reduce((a, b) => a + b, 0), what = c.kind === 'duel' ? 'duel damage' : c.kind === 'charge die' ? 'charge die' : 'escape dice';
+        setPrompt('Gunner charge', `${c.own ? 'Your' : theirName + '’s'} ${what} roll. Re-roll it, or keep it?`);
+        info.innerHTML = `<h4>${c.own ? 'Your' : theirName + '’s'} ${what} roll</h4><div class="rrdice" data-kind="${esc(c.kind)}" data-own="${c.own ? 1 : 0}"><span class="tag dsize">${plural(rolls.length, coin ? 'coin' : 'die').replace('dies', 'dice')} · ${coin ? 'd2' : 'd' + c.sides}</span>
+          <div class="row ${rolls.length > 5 ? 's' : 'm'}">${rolls.map(x => die(x, { cls: coin ? 'coin' : c.kind === 'charge die' ? 'd8' : '' })).join('')}${rolls.length > 1 && c.kind !== 'escape' ? `<span class="rrtotal">= <b>${total}</b></span>` : ''}</div></div>`;
+        hand.innerHTML = `<h4>As it stands</h4><ul class="mvdo">${rerollLines(G.match, me, c, theirName).map(l => `<li class="${l.cls}">${l.html}</li>`).join('')}</ul>`;
+        act.innerHTML = chargePips(v, me, 'A re-roll costs 1 charge') + btn('reroll', 'Re-roll it', `Roll ${rolls.length > 1 ? `all ${rolls.length} dice` : 'the die'} again, once`, { cls: 'main mid compact' })
+          + btn('keep', 'Keep the roll', 'Save the charge', { cls: 'mid compact' }) + err;
         break;
       }
       default: {        // anything else the engine asks: one button per legal action
@@ -4741,11 +4860,13 @@ const BOT_ROSTER = [{"id":55,"name":"Bot56","moves":"blockHeavy","chainStyle":"l
     // for the UI checks (tests/ui-checks.html): read-only helpers, plus a way to start a match and to ask the engine again for
     // the duel decision after a check has set the match up (hand, bars, deck) the way it needs
     test: {
-      objective, whyNotChain, lostNote, attackFirst, playEvents, tips: TIPS, toggleTips, drawsOf,
+      objective, whyNotChain, lostNote, duelOutcome, attackFirst, playEvents, tips: TIPS, toggleTips, drawsOf,
       get speed() { return speed; },
       menu: showStart,                                         // back to the start page
       start(mine, theirs) { pending = null; pickState.mine = mine; pickState.theirs = theirs; return startMatch(mine, theirs); },
       plans() { return chainPlans(G.view); },
+      // put one decision on screen as the engine would ask it (to look at a screen that is hard to reach by playing); the answer goes to `done`
+      show(d, done) { pending = { d, resolve: done || (() => {}), signed: true }; G.view = snapshot(G.match); G.picks = []; G.error = ''; G.armed = null; coachHide(); render(); },
       redecide() {
         if (!pending || pending.d.kind !== 'duel') return false;
         pending = { d: G.match.duelDecision(0), resolve: pending.resolve, signed: true };
