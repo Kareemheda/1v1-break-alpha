@@ -1264,6 +1264,75 @@ svg.radar { flex: 1; min-height: 0; width: 100%; display: block; }
 .gpips b { font: 400 19px/1 var(--f-label); }
 .gpips small { margin-left: auto; font: 800 13px/1 var(--f-text); color: var(--dim); }
 
+/* ---- the guided tutorial (game-src/tutorial.js): a lesson card, a spotlight on the one control to use, a way out ---- */
+/* the start page with four choices: a little shorter each, so all four fit above the key hint */
+.smenu.n4 { top: 272px; gap: 14px; }
+.smenu.n4 .sbtn { height: 78px; }
+.smenu.n4 .sbtn b { font-size: 44px; }
+.smenu.n4 .sbtn small { font-size: 16px; }
+/* the layer over the arena: everything dimmed but a hole around the control to use (the hole is the spotlight's own shadow) */
+.tutlayer { position: absolute; inset: 0; z-index: 85; overflow: hidden; pointer-events: none; }
+.tutlayer[hidden] { display: none; }
+.tutdim { position: absolute; inset: 0; background: #0b1f33c2; opacity: 0; }
+.tutlayer.full .tutdim { opacity: 1; }
+.tutspot { position: absolute; box-shadow: 0 0 0 4px #14324a, 0 0 0 9px #ffe27a, 0 0 0 13px #14324a, 0 0 0 2000px #0b1f33c2; animation: tutring .55s steps(2) infinite alternate; }
+.tutspot[hidden] { display: none; }
+.tutspot.look { animation: none; box-shadow: 0 0 0 4px #14324a, 0 0 0 8px #fff8e0, 0 0 0 12px #14324a, 0 0 0 2000px #0b1f33c2; }
+@keyframes tutring { from { outline: 0 solid transparent; } to { outline: 5px solid #fff8e0; outline-offset: 13px; } }
+.tutspot.nudge { animation: tutnudge .3s steps(3) 2; }
+@keyframes tutnudge { 0%, 100% { transform: translateX(0); } 33% { transform: translateX(-6px); } 66% { transform: translateX(6px); } }
+.tutarrow { position: absolute; width: 60px; display: flex; justify-content: center; animation: tutbob .4s steps(2) infinite alternate; filter: drop-shadow(0 4px 0 #0b1f33); }
+.tutarrow[hidden] { display: none; }
+@keyframes tutbob { from { transform: translateY(-6px); } to { transform: translateY(2px); } }
+/* the lesson card: the coach tip's cream and gold, with a navy "Tutorial" band, the lesson count and nine pixel pips */
+.tutcard { position: absolute; left: 370px; top: 96px; width: 540px; max-height: 340px; z-index: 2; pointer-events: auto; display: flex; flex-direction: column; overflow: hidden;
+  background: #fffbe0; color: #14324a; box-shadow: var(--notch-4), inset 0 0 0 3px #ffbe1f, 0 8px 0 #0b1f3380; animation: tutin .22s cubic-bezier(.2, 1.3, .4, 1) both; }
+.tutcard[hidden] { display: none; }
+@keyframes tutin { from { transform: translateY(-14px); opacity: 0; } to { transform: none; opacity: 1; } }
+.tutcard .thead, .tutoffer .thead { flex: none; display: flex; align-items: center; gap: 12px; height: 38px; padding: 0 12px; background: #14324a; color: #fff8e0; }
+.ttag { display: flex; align-items: center; gap: 7px; padding: 3px 9px 4px 6px; font: 400 21px/1 var(--f-label); color: #14324a; background: linear-gradient(#ffe27a, #ffb52e); box-shadow: inset 0 0 0 2px #fff3b8; letter-spacing: .03em; text-transform: uppercase; }
+.tnum { font: 400 22px/1 var(--f-label); color: #fff3b8; white-space: nowrap; }
+.tpips { margin-left: auto; display: flex; gap: 5px; }
+.tpips i { width: 13px; height: 13px; background: #35566b; box-shadow: 0 0 0 2px #0b1f33; }
+.tpips i.done { background: #ffbe1f; }
+.tpips i.now { background: #fff8e0; box-shadow: 0 0 0 2px #0b1f33, 0 0 0 4px #ffbe1f; animation: tutpip .5s steps(2) infinite alternate; }
+@keyframes tutpip { to { background: #ffbe1f; } }
+.tmain { flex: 1; min-height: 0; padding: 10px 18px 4px; position: relative; }
+.tlesson { margin: 0 0 2px; font: 800 14px/1 var(--f-text); color: #4f6f80; text-transform: uppercase; letter-spacing: .06em; }
+.tutcard h3 { margin: 0 0 6px; font: 400 34px/1 var(--f-title); color: #c8322c; }
+.tbody { font-size: 22px; }
+.tbody p { margin: 0 0 4px; font: 700 1em/1.28 var(--f-text); color: #14324a; }
+.tph { position: absolute; right: 14px; top: 10px; padding: 2px 7px 3px; font: 400 15px/1 var(--f-label); color: #fff8e0; background: #b96a00; box-shadow: var(--notch-3); text-transform: uppercase; }
+.tfoot { flex: none; display: flex; align-items: center; justify-content: flex-end; gap: 14px; padding: 6px 16px 12px; }
+.tfoot .btn { width: auto; min-width: 180px; height: 52px; padding: 0 22px; }
+.tfoot .btn b { font-size: 32px; }
+.tfoot .btn small { font-size: 14px; margin-top: 0; }
+/* waiting for you: what to do now, beside a blinking light */
+.twait { flex: 1; display: flex; align-items: center; gap: 12px; padding: 7px 12px 8px; background: #14324a; color: #fff8e0; box-shadow: var(--notch-3); }
+.twait small { display: block; font: 800 13px/1.1 var(--f-text); color: #9fc4dd; text-transform: uppercase; letter-spacing: .06em; }
+.twait b { display: block; font: 400 27px/1 var(--f-label); color: #ffe27a; white-space: nowrap; }
+.tdot { flex: none; width: 16px; height: 16px; background: #4fc23f; box-shadow: 0 0 0 2px #0b1f33, 0 0 0 4px #eaffd6; animation: tutpip .5s steps(2) infinite alternate; }
+.tutcard.end h3 { color: #14324a; }
+/* the way out, always there during the tutorial (top left of the frame, over the dimming) */
+.chip.tutskip { position: absolute; left: 14px; top: 8px; z-index: 88; margin: 0; padding: 7px 12px 8px; font-size: 19px; background: #fffbe0; box-shadow: var(--notch-3), inset 0 0 0 2px #ffbe1f; }
+.chip.tutskip:hover { background: #fff3b8; }
+/* the first-launch offer over the start page (the Settings box's dimming) */
+.panel.tutoffer { left: 390px; top: 196px; width: 500px; padding: 0 0 20px; display: flex; flex-direction: column; align-items: stretch; background: #fffbe0; box-shadow: var(--notch-4), inset 0 0 0 3px #ffbe1f; }
+.tutoffer h3 { margin: 18px 24px 4px; font: 400 48px/1 var(--f-title); color: #c8322c; }
+.tutoffer p { margin: 0 24px 16px; font: 800 22px/1.25 var(--f-text) !important; color: #14324a; }
+.tobtns { display: flex; gap: 14px; padding: 0 24px; }
+.tobtns .btn { height: 70px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 8px; }
+.tobtns .btn b { font-size: 36px; white-space: nowrap; }
+.tobtns .btn small { font-size: 14px; white-space: nowrap; }
+.tobtns .btn:first-child { flex: 1.3; }
+.tobtns .btn:focus-visible, .tfoot .btn:focus-visible { outline: 4px dashed #e8443a; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .tutspot, .tutarrow, .tpips i.now, .tdot, .tutcard { animation: none; } }
+/* the end card's three ways on: side by side, each the same width */
+.tutcard.end .tfoot { gap: 10px; }
+.tutcard.end .tfoot .btn { flex: 1; min-width: 0; height: 58px; padding: 0 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
+.tutcard.end .tfoot .btn b { font-size: 28px; white-space: nowrap; }
+.tutcard.end .tfoot .btn small { font-size: 13px; white-space: nowrap; }
+
 </style>
 </head>
 <body>
@@ -2705,6 +2774,308 @@ const GUIDE_RADAR_AXES = [
   ["ceiling", "Ceiling", "How good they are in the best hands"],
 ];
 
+// ---- The guided tutorial: nine lessons in one rigged first match ----
+// A first match against a sparring partner (the engine's "Default" character, with smaller bars). The rules stay the engine's:
+// nothing here changes referee/engine.mjs. The tutorial only (1) stacks the cards and dice in a subclass of the game's match,
+// (2) answers for the sparring partner, and (3) pauses at each new idea with a lesson card and a spotlight on the one control
+// to use. game.js calls TUTORIAL.create(api) once, and calls the session's hooks (answer, rendered, submitted, ended, stop).
+// The "Say" lines are the owner's script, word for word (lesson 7's is adapted to "let it land", as the owner chose).
+//
+// The match, round by round (you are Player 1; bars: you 10/12/8, the sparring partner 6/6/4):
+//   setup  you pick a weak point; hand 3, 4, 8, swap the 8 for a 5
+//   R1  lesson 2: your Basic beats their Heavy (4 damage: Break 6 → 2); Basic's swap: your 5 for the 8 in your discard pile
+//   R2  a hit: your Block loses to their Heavy (3 damage: your Break 10 → 7); Block draws a 6
+//   R3  lesson 3: your Block beats their Basic (1 damage: Break 2 → 1), heals you 3, draws a 1
+//   R4  lesson 4: your Basic beats their Heavy (Break 1 → 0); Basic's swap: the 8 for your 5 (hand 3, 4, 5, 6, 1)
+//   R5  lessons 5 and 6: your chain 3-4-5 lands; charge d8 5, then 6, their escape dice never match; attack 11 − 3 = 8: Shield 6 → 0
+//   R6, R7  lesson 7: their Heavy beats your Block twice, with double dice (6, then 4: your Break 10 → 0)
+//   R8  lesson 7: their chain 7-7-7; you let it land; your escape dice 2, 2, 3: keep the 2s, reroll a 2: you break free
+//   R9  lesson 8: your Heavy beats their Block (4 damage: Last 4 → 0); Heavy's card effect: discard a 1, draw a 7
+//   R10 lesson 9: your 6 goes onto 3-4-5 as a Killing Blow chain; it lands; whatever you name is their weak point
+const TUTORIAL = (() => {
+  const LESSONS = ['Setup and mulligan', 'The duel', 'The cards', 'The break', 'Playing a chain', 'The charge', 'Defending a chain', 'The final stage', 'The Killing Blow'];
+  const SEEN_KEY = 'break-tutorial-offered';      // the first-launch offer shows once on this device
+  const DONE_KEY = 'break-tutorial-done';         // the tutorial was played to the end
+  const SPAR_BARS = { break: 6, shield: 6, last: 4 };      // the sparring partner's smaller bars
+  const SPAR_NAME = 'Sparring partner';
+  const MY_DECK_TOP = [3, 4, 8, 5, 6, 1, 8, 1, 7];      // your draws, in order: hand, mulligan, then each Block or Heavy draw
+  // every die rolled, round by round, in the order the engine rolls them (a roll of another size falls back to chance)
+  const ROLLS = { 1: [[4]], 2: [[2, 1]], 3: [[1]], 4: [[3]], 5: [[5], [1, 2, 3], [6], [3, 1, 2]], 6: [[2, 2, 1, 1]], 7: [[1, 1, 1, 1]], 8: [[6], [2, 2, 3], [2]], 9: [[2, 2]] };
+  // the sparring partner's move each round
+  const THEIR_MOVE = { 1: 'heavy', 2: 'heavy', 3: 'basic', 4: 'heavy', 6: 'heavy', 7: 'heavy', 9: 'block' };
+
+  function create(api) {
+    const { one, all, esc, pic, sfx } = api;
+    let S = null;        // the running tutorial session, or null
+
+    /* ---------- the rigged match ---------- */
+    const makeMatch = (Base, args) => new (class TutorialMatch extends Base {
+      constructor(a) { super(a); this.rigRolls = []; }
+      makePlayer(p) {
+        const P = super.makePlayer(p);
+        if (p === 0) {
+          MY_DECK_TOP.forEach(n => { const i = P.deck.indexOf(n); if (i >= 0) P.deck.splice(i, 1); });
+          P.deck.unshift(...MY_DECK_TOP);
+        }
+        return P;
+      }
+      setup(p) { if (p === 0) this.bars[1] = { ...SPAR_BARS }; return super.setup(p); }
+      max(p, b) { return p === 1 ? SPAR_BARS[b] : super.max(p, b); }
+      async turn() {
+        this.rigRolls = (ROLLS[this.round] || []).map(r => r.slice());
+        if (this.round === 8) this.pl[1].hand = [7, 7, 7];      // their chain for lesson 7
+        return super.turn();
+      }
+      roll(n, sides) { const r = this.rigRolls.length && this.rigRolls[0].length === n ? this.rigRolls.shift() : null; return r ? r.map(x => Math.min(x, sides)) : super.roll(n, sides); }
+    })(args);
+
+    // the sparring partner's answers (anything not listed: the usual computer)
+    function answer(d) {
+      const round = S && S.m ? S.m.round : 1;
+      if (d.kind === 'duel') return round === 8 ? 'chain new 1 2 3' : THEIR_MOVE[round] || 'block';
+      return { 'setup-weak': 'weak heart', 'setup-discard': 'discard 1', 'heavy-cycle': 'discard 1', 'basic-swap': 'swap 1 1', defend: 'land', keep: 'keep all', charge: 'attack' }[d.kind] || null;
+    }
+
+    /* ---------- the script: what to show at each of your decisions ---------- */
+    // A step: { beat, title, say: [lines], got: true (say-only, "Got it"), or todo/target/allow (it waits for you to act), look: what to light up }
+    const G = () => api.G, V = () => api.G.view;
+    const picks = () => G().picks;
+    const handIdx = n => V().hand.indexOf(n);
+    const handCard = n => { const i = handIdx(n); return i < 0 ? null : one(`#dHand [data-pick="${i}"][data-zone="hand"]`); };
+    const act = a => one(`#dAct [data-act="${a}"]`);
+    const meter = (p, i) => all(`#g${p} .meter`)[i];
+    // a step that waits for one move button
+    const move = (beat, title, say, key, name) => ({ beat, title, say, todo: () => `Click ${name}`, target: () => [act(key)], allow: () => [act(key)] });
+    function stepsFor(d) {
+      const round = S.m.round, key = `${d.kind}@${round}`;
+      S.count[key] = (S.count[key] || 0) + 1;
+      const nth = S.count[key];
+      switch (key) {
+        case 'setup-weak@1': return [{ beat: 1, title: 'Your secret weak point',
+          say: ['Before the fight, choose your weak point in secret. To finish you, your opponent has to guess it.'],
+          todo: () => 'Pick Head, Heart or Throat', target: () => all('#dAct .btn'), allow: () => all('#dAct .btn') }];
+        case 'setup-discard@1': return [{ beat: 1, title: 'Swap one card',
+          say: ['You start with three cards. Before the fight you must swap one: discard it and draw a new one. That 8 doesn’t fit with your other cards.'],
+          todo: () => picks().length ? 'Now press Discard and draw' : 'Click the 8',
+          target: () => picks().length ? [one('#dAct .btn')] : [handCard(8)],
+          allow: () => [handCard(8), picks().length ? one('#dAct .btn') : null] }];
+        case 'duel@1': return [
+          { beat: 2, title: 'Pick a move in secret', got: true, look: () => all('#dAct .btn'),
+            say: ['Each round, you and your opponent pick a move in secret, then reveal together. Basic beats Heavy. Heavy beats Block. Block beats Basic.'] },
+          move(2, 'Your first move', ['Try Basic.'], 'basic', 'Basic')];
+        case 'basic-swap@1': return [
+          { beat: 2, title: 'You won the round', got: true, look: () => [meter(1, 0)], say: ['Win the guess, land the hit.'] },
+          swapStep(2, 'Basic’s card effect', 'Basic’s card effect: swap one of your cards with one from your discard pile. Swap the 5 for the 8 for now; you’ll get it back.', 5, 8)];
+        case 'duel@2': return [move(2, 'Another round', ['Now try Block.'], 'block', 'Block')];
+        case 'duel@3': return [
+          { beat: 2, title: 'You took a hit', got: true, look: () => [meter(0, 0)], say: ['Heavy beats Block, so you took a hit. Let’s win it back.'] },
+          move(3, 'Every move does two things', ['Each move also changes your hand. Block draws a card. Basic swaps one for a card in your discard pile. Heavy discards one, then draws one.'], 'block', 'Block')];
+        case 'duel@4': return [move(4, 'Break them', ['Their Break bar is almost empty. Try Basic again.'], 'basic', 'Basic')];
+        case 'basic-swap@4': return [
+          { beat: 4, title: 'Their Break is empty', got: true, look: () => [meter(1, 0)], say: ['Their Break bar is empty. They’re open to a chain.'] },
+          swapStep(4, 'Get your 5 back', 'Basic’s swap again: give the 8 back and take your 5.', 8, 5)];
+        case 'duel@5': return [chainStep(5, 'Your first chain', ['A chain is three numbers in a row, or three of the same number. You have 3, 4, 5.'], [3, 4, 5], 'Select 3, 4 and 5', 'Press Play selected chain')];
+        case 'charge@5': return nth === 1 ? [
+          { beat: 5, title: 'Your chain landed', got: true, look: () => [one('#t0')],
+            say: ['They could have stopped it by discarding three cards. They didn’t, so your chain landed. It stays on the table, and next time their Break empties you can add a card to it.'] },
+          { beat: 6, title: 'Charge!', say: ['Your chain caught them. Charge your attack: each charge rolls a die and adds it to your attack. They roll their own dice trying to break free. If all their dice match, they escape.'],
+            todo: () => 'Press Charge again', target: () => [act('charge')], allow: () => [act('charge')] }]
+          : [{ beat: 6, title: 'Attack', say: ['Your total, minus their highest die, hits their Shield.'], todo: () => 'Press Attack now', target: () => [act('attack')], allow: () => [act('attack')] }];
+        case 'duel@6': return [move(7, 'They fight back', ['Their Shield is gone, so now they roll double dice. Watch out.'], 'block', 'Block')];
+        case 'duel@7': return [move(7, 'Another hit', ['One more hit and your Break is empty.'], 'block', 'Block')];
+        case 'defend@8': return [{ beat: 7, title: 'They play a chain', say: ['Now they’re chaining you. You could stop it by discarding as many cards as the chain is long, but you’d lose your cards. Let it land, then try to break free with your dice.'],
+          todo: () => 'Press Let it land', target: () => [act('land')], allow: () => [act('land')] }];
+        case 'keep@8': {
+          const twos = () => all('#dHand [data-zone="die"]').filter(b => b.textContent.trim() === '2');
+          const both = () => twos().length > 0 && twos().every(b => picks().includes(Number(b.dataset.pick))) && picks().length === twos().length;
+          const reroll = () => one('#dAct [data-act^="keep "]:not([data-act="keep all"])');
+          return [{ beat: 7, title: 'Break free', say: ['Keep the dice that match, then reroll the rest.'],
+            todo: () => both() ? 'Press Reroll the rest' : 'Click the two 2s',
+            target: () => both() ? [reroll()] : twos().filter(b => !picks().includes(Number(b.dataset.pick))), allow: () => twos().concat(both() ? [reroll()] : []) }];
+        }
+        case 'duel@9': return [
+          { beat: 7, title: 'You broke free!', got: true, look: () => [meter(0, 0)], say: ['All your dice match: you broke free!'] },
+          move(8, 'The final stage', ['Their Shield is gone, so hits now go to their Last bar. A fighter with no Shield rolls double dice, so be quick.'], 'heavy', 'Heavy')];
+        case 'heavy-cycle@9': return [{ beat: 8, title: 'Heavy’s card effect', say: ['Heavy’s card effect: discard one card, then draw one. Keep your 6 for later.'],
+          todo: () => picks().length ? 'Press Discard and draw' : 'Click a 1',
+          target: () => picks().length ? [one('#dAct .btn')] : [handCard(1)], allow: () => [handCard(1), picks().length ? one('#dAct .btn') : null] }];
+        case 'duel@10': return [chainStep(9, 'The Killing Blow', ['Their Last bar is empty. Play a chain to strike, then name their weak point.'], [6], 'Select your 6', 'Press Play Killing Blow chain')];
+        case 'killing-blow@10': return [{ beat: 9, title: 'Name it', say: ['Your chain landed. Name their weak point.'],
+          todo: () => 'Pick Head, Heart or Throat', target: () => all('#dAct [data-act^="name "]'), allow: () => all('#dAct [data-act^="name "]') }];
+      }
+      return [];
+    }
+    // Basic's swap: your `give` card, then the `take` card in your discard pile, then Swap
+    function swapStep(beat, title, line, give, take) {
+      const mine = () => handCard(give), theirs = () => { const i = V().discard[0].indexOf(take); return i < 0 ? null : one(`#dInfo [data-zone="discard"][data-pick="${i}"]`); };
+      const at = () => !picks().length ? 0 : G().extra === null ? 1 : 2;
+      return { beat, title, say: [line], todo: () => [`Click your ${give}`, `Click the ${take} in your discard pile`, 'Press Swap'][at()],
+        target: () => [[mine(), theirs(), one('#dAct .btn')][at()]], allow: () => [mine(), theirs(), at() === 2 ? one('#dAct .btn') : null] };
+    }
+    // a chain: select exactly these cards (one by one, or with the "Select" button when it picks the same), then play them
+    function chainStep(beat, title, say, cards, selTodo, playTodo) {
+      const idx = () => cards.map(handIdx), want = () => idx().slice().sort().join(' ');
+      const ready = () => picks().slice().sort().join(' ') === want();
+      const cardsEls = () => idx().map(i => one(`#dHand [data-pick="${i}"][data-zone="hand"]`));
+      const cta = () => { const b = one('#dAct [data-chainpick]'); return b && b.dataset.chainpick.split(' ').map(Number).sort().join(' ') === want() ? b : null; };
+      const play = () => one('#dAct .playchain');
+      return { beat, title, say, todo: () => ready() ? playTodo : selTodo,
+        target: () => ready() ? [play()] : (cta() ? [cta()] : cardsEls().filter(b => b && !picks().includes(Number(b.dataset.pick)))),
+        allow: () => cardsEls().concat([cta(), ready() ? play() : null]) };
+    }
+    // after the win
+    const lastSteps = () => [
+      { beat: 9, title: 'You found it', got: true, say: ['A wrong guess would have brought their Last bar back to half, and you’d try again. This time you found it.'] },
+      { beat: 9, end: true, title: 'Tutorial complete', say: ['You won! Pick any character to play, or read their guides first.'] }];
+
+    /* ---------- drawing: the layer over the arena, the spotlight, the lesson card ---------- */
+    function layer() {
+      let el = one('#tut');
+      if (!el) {
+        one('#frame').insertAdjacentHTML('beforeend', `<div class="tutlayer" id="tut" aria-live="polite"><div class="tutdim"></div><div class="tutspot" hidden></div><div class="tutarrow" hidden>${pic('down', 5)}</div>
+          <div class="tutcard" id="tutCard" role="dialog" aria-label="Tutorial lesson" hidden></div></div>
+          <button type="button" class="chip tutskip" id="tutSkip" title="Leave the tutorial and go back to the start page">✕ Skip tutorial</button>`);
+        el = one('#tut');
+        one('#tutSkip').onclick = () => skip();
+      }
+      return el;
+    }
+    // a box around some elements, in the frame's own 1280×720 units
+    function boxOf(els) {
+      const f = one('#frame').getBoundingClientRect(), k = f.width / 1280 || 1, rs = els.filter(Boolean).map(e => e.getBoundingClientRect()).filter(r => r.width);
+      if (!rs.length) return null;
+      const x0 = Math.min(...rs.map(r => r.left)), y0 = Math.min(...rs.map(r => r.top)), x1 = Math.max(...rs.map(r => r.right)), y1 = Math.max(...rs.map(r => r.bottom));
+      return { x: (x0 - f.left) / k, y: (y0 - f.top) / k, w: (x1 - x0) / k, h: (y1 - y0) / k };
+    }
+    const pips = beat => `<span class="tpips" aria-hidden="true">${LESSONS.map((_, i) => `<i class="${i + 1 < beat ? 'done' : i + 1 === beat ? 'now' : ''}"></i>`).join('')}</span>`;
+    function drawCard(st) {
+      const card = one('#tutCard'), waiting = !st.got && !st.end;
+      card.className = 'tutcard' + (st.end ? ' end' : waiting ? ' waiting' : '');
+      card.innerHTML = `<div class="thead"><span class="ttag">${pic('rules', 2)}Tutorial</span><span class="tnum">${st.end ? 'All 9 lessons done' : `Lesson ${st.beat} of ${LESSONS.length}`}</span>${pips(st.end ? LESSONS.length + 1 : st.beat)}</div>
+        <div class="tmain"><p class="tlesson">${esc(st.end ? 'Well done' : LESSONS[st.beat - 1])}</p><h3>${esc(st.title)}</h3>
+        <div class="tbody">${st.say.map(l => `<p>${esc(l)}</p>`).join('')}</div></div>
+        <div class="tfoot">${st.end ? `<button type="button" class="btn main mid" id="tutPlay"><b>Play</b><small>Choose the fighters</small></button><button type="button" class="btn mid" id="tutChars"><b>Characters</b><small>Read the guides</small></button><button type="button" class="btn mid" id="tutMenu"><b>Menu</b><small>The start page</small></button>`
+          : st.got ? '<button type="button" class="btn main mid" id="tutGot"><b>Got it</b></button>'
+          : `<span class="twait"><i class="tdot"></i><span><small>Waiting for you</small><b id="tutTodo">${esc(st.todo())}</b></span></span>`}</div>`;
+      card.hidden = false;
+      const got = one('#tutGot'); if (got) { got.onclick = () => { sfx('button'); next(); }; got.focus({ preventScroll: true }); }
+      const leave = (id, go) => { const b = one(id); if (b) b.onclick = () => { finish(); go(); }; };
+      leave('#tutPlay', () => api.showSelect('pick')); leave('#tutChars', () => api.showSelect('browse')); leave('#tutMenu', () => api.showStart());
+      if (st.end) one('#tutPlay').focus({ preventScroll: true });
+      // text-fit: the lesson always stays inside its card
+      const body = one('.tbody', card); body.style.fontSize = '';
+      for (let f = 22; f > 15 && card.scrollHeight > card.clientHeight + 1; f -= 1) body.style.fontSize = f + 'px';
+    }
+    // light up the target (or what to look at), point the arrow at it, and keep the lesson card clear of it
+    function place() {
+      if (!S || !S.step || !one('#tut')) return;
+      const st = S.step, els = (st.got ? (st.look ? st.look() : []) : st.end ? [] : st.target()).filter(Boolean);
+      const b = boxOf(els), spot = one('#tut .tutspot'), arrow = one('#tut .tutarrow'), card = one('#tutCard');
+      one('#tut').classList.toggle('full', !b);
+      spot.hidden = !b; arrow.hidden = !b || !!st.got;
+      spot.classList.toggle('look', !!st.got);
+      if (b) {
+        const pad = 8;
+        Object.assign(spot.style, { left: b.x - pad + 'px', top: b.y - pad + 'px', width: b.w + 2 * pad + 'px', height: b.h + 2 * pad + 'px' });
+        arrow.style.left = Math.round(b.x + b.w / 2 - 30) + 'px'; arrow.style.top = Math.round(b.y - pad - 58) + 'px';
+      }
+      // the card: over the middle of the stage, or (when what it points at is up there) over the dock
+      const high = b && b.y < 330 && b.x + b.w > 370 && b.x < 910;
+      card.style.top = high ? Math.max(60, 708 - card.offsetHeight) + 'px' : '60px';      // (low: its bottom stays inside the frame)
+      const todo = one('#tutTodo'); if (todo && st.todo) todo.textContent = st.todo();
+    }
+    function show() {
+      layer(); one('#tut').hidden = false;
+      drawCard(S.step); place();
+      setTimeout(place, 260);      // the dock may still be sliding into place
+    }
+    function hide() { const t = one('#tut'); if (t) { t.hidden = true; one('#tutCard').hidden = true; } }
+    function next() {
+      S.queue.shift(); S.step = S.queue[0] || null;
+      if (S.step) show(); else hide();
+    }
+
+    /* ---------- while a lesson is up, only its control can be used ---------- */
+    function guard(e) {
+      if (!S || !S.step || !api.G || api.G.tut !== S) return;
+      const t = e.target;
+      if (t.closest('#tutCard') || t.closest('#tutSkip') || t.closest('#settings')) return;
+      const ok = !S.step.got && !S.step.end && S.step.allow().filter(Boolean).some(a => a.contains(t));
+      if (ok) return;
+      e.stopPropagation(); e.preventDefault();
+      const spot = one('#tut .tutspot'); if (spot) { spot.classList.remove('nudge'); void spot.offsetWidth; spot.classList.add('nudge'); }
+    }
+    let guarded = false;
+    function guardOn() { if (guarded) return; guarded = true; one('#frame').addEventListener('click', guard, true); window.addEventListener('resize', () => place()); }
+
+    /* ---------- the session ---------- */
+    function start() {
+      markSeen();
+      S = { count: {}, queue: [], step: null, pend: null, m: null,
+        makeMatch: (Base, args) => (S.m = makeMatch(Base, args)), answer,
+        // game.js: a decision of yours is on screen (called at the end of every render)
+        rendered(p) {
+          if (S.pend !== p) { S.pend = p; S.queue = stepsFor(p.d); S.step = S.queue[0] || null; if (S.step) show(); else hide(); }
+          else place();
+        },
+        // game.js: you answered. A Killing Blow guess is always right: their weak point becomes the one you named
+        submitted(d, action) {
+          if (d && d.kind === 'killing-blow') { const w = String(action).trim().toLowerCase().split(/\s+/)[1]; const W = S.m.ch(1).weakPoints.find(x => x.toLowerCase() === w); if (W) S.m.pl[1].weak = W; }
+          S.queue = []; S.step = null; hide();
+        },
+        // game.js: the match is over (the end screen is up)
+        ended(r) {
+          if (r.winner !== 0) return;
+          try { localStorage.setItem(DONE_KEY, '1'); } catch (e) { /* not remembered */ }
+          { const k = one('#tutSkip'); if (k) k.remove(); }      // nothing left to skip: the end card has its own way out
+          S.queue = lastSteps(); S.step = S.queue[0]; show();
+        },
+        stop() { if (S === this) S = null; hide(); const k = one('#tutSkip'); if (k) k.remove(); },
+      };
+      guardOn();
+      api.startMatch('swordsman', 'default', { tut: S, names: [null, SPAR_NAME] });
+      return S;
+    }
+    function finish() { markSeen(); if (S) S.stop(); }
+    function skip() { sfx('button'); finish(); api.showStart(); }
+
+    /* ---------- the first-launch offer, over the start page ---------- */
+    function seen() { try { return localStorage.getItem(SEEN_KEY) === '1'; } catch (e) { return true; } }
+    function markSeen() { try { localStorage.setItem(SEEN_KEY, '1'); } catch (e) { /* not remembered */ } }
+    function offer(force) {
+      if ((!force && seen()) || one('#tutOffer') || !one('#start')) return false;
+      markSeen();
+      const frame = one('#frame'), under = Array.from(frame.children);
+      frame.insertAdjacentHTML('beforeend', `<div class="setwrap tutwrap" id="tutOffer"><div class="panel tutoffer" role="dialog" aria-label="Tutorial">
+        <div class="thead"><span class="ttag">${pic('rules', 2)}Tutorial</span>${pips(0)}</div>
+        <h3>New to 1v1 Break?</h3><p>Learn in a 5-minute guided match.</p>
+        <div class="tobtns"><button type="button" class="btn main mid" id="tutYes"><b>Start tutorial</b><small>Nine short lessons</small></button>
+        <button type="button" class="btn mid" id="tutNo"><b>Skip</b><small>Find it later on the start page</small></button></div></div></div>`);
+      under.forEach(x => { x.inert = true; });
+      const box = one('#tutOffer');
+      box._close = () => { box.remove(); under.forEach(x => { x.inert = false; }); };
+      one('#tutYes').onclick = () => { box._close(); start(); };
+      one('#tutNo').onclick = () => { box._close(); const t = one('#start [data-go="tutorial"]'); if (t) t.focus({ preventScroll: true }); };
+      one('#tutYes').focus({ preventScroll: true });
+      return true;
+    }
+    function closeOffer() { const b = one('#tutOffer'); if (b) { b._close(); return true; } return false; }
+
+    return {
+      start, offer, closeOffer, skip,
+      get session() { return S; },
+      get step() { return S && S.step ? { beat: S.step.beat, title: S.step.title, waiting: !S.step.got && !S.step.end, got: !!S.step.got, end: !!S.step.end } : null; },
+      // what the spotlight points at now (for the UI checks' automatic player)
+      targets() { const st = S && S.step; return st && !st.got && !st.end ? st.target().filter(Boolean) : []; },
+      get beat() { return S && S.step ? S.step.beat : null; }, get seen() { return seen(); },
+      get done() { try { return localStorage.getItem(DONE_KEY) === '1'; } catch (e) { return false; } },
+      forget() { try { localStorage.removeItem(SEEN_KEY); localStorage.removeItem(DONE_KEY); } catch (e) { /* nothing */ } },
+      LESSONS,
+    };
+  }
+  return { create };
+})();
+
 // ---- Computer opponents ----
 // The 64 tournament bots (referee/bots.mjs makeBots(64) with the tournament seed), ranked by their win rate in the 1,000-tournament
 // run on rules 1.39 (every bot plays every character in rotation). Tiers for the Settings difficulty: the strongest 21 = "hard",
@@ -2730,6 +3101,7 @@ const BOT_ROSTER = [{"id":55,"name":"Bot56","moves":"blockHeavy","chainStyle":"l
     swordsman: ['#2a5fbf', '#14285c', '#ffbe1f'], archer: ['#3aa65a', '#1f5e33', '#ffbe1f'], mage: ['#a53dff', '#4b148a', '#ffbe1f'],
     paladin: ['#f4f8ff', '#b9c6e6', '#ffbe1f'], demon: ['#e8443a', '#a81f33', '#14324a'], vampire: ['#7a22c9', '#2b3a55', '#e8443a'],
     cavalryman: ['#35b4ec', '#1f3f8a', '#f4f8ff'], gunner: ['#1fe0ff', '#6f7fb0', '#e8443a'],
+    default: ['#c98a4a', '#7a4f22', '#f4f8ff'],      // the tutorial's sparring partner: a wooden training dummy
   };
   const one = (s, r) => (r || document).querySelector(s);
   const all = (s, r) => Array.from((r || document).querySelectorAll(s));
@@ -3248,22 +3620,26 @@ const BOT_ROSTER = [{"id":55,"name":"Bot56","moves":"blockHeavy","chainStyle":"l
     };
   }
 
+  // a fighter's name on screen (the tutorial calls the engine's "Default" its sparring partner)
+  const charName = p => (G.names && G.names[p]) || CHARACTERS[G.chars[p]].name;
   const nameOf = p => {
-    const k = G.chars[p], n = CHARACTERS[k].name;
+    const k = G.chars[p], n = charName(p);
     return G.chars[0] === G.chars[1] ? `${n} (${p === 0 ? 'you' : 'computer'})` : n;
   };
   // the engine says "Player 1" / "Player 2"; the screen says the characters' names
   const tell = t => t.replace(/Player 1/g, nameOf(0)).replace(/Player 2/g, nameOf(1));
 
-  async function startMatch(mine, theirs) {
+  // opts (the tutorial): { tut: its session (rigged match, scripted opponent, lessons), names: [your name, theirs] }
+  async function startMatch(mine, theirs, opts = {}) {
     const my = ++nav; screen = 'match';
     await Promise.all([loadArt(mine), loadArt(theirs)]);
     if (nav !== my) return;                          // another screen was opened while the art loaded
     const bot = pickBot();                         // a tournament bot, by the difficulty setting
-    G = { chars: [mine, theirs], bot, level, events: [], log: [], mode: 'duel', picks: [], extra: null, lastMoves: [null, null], token: {}, formNow: [null, null] };
+    G = { chars: [mine, theirs], bot, level, events: [], log: [], mode: 'duel', picks: [], extra: null, lastMoves: [null, null], token: {}, formNow: [null, null], tut: opts.tut || null, names: opts.names || null };
     const token = G.token;
     music('battle', { fade: 800 }); G.finalMusic = false;
-    G.match = new ArenaMatch({ ask, maxRounds: 60, characters: [mine, theirs] });
+    const args = { ask, maxRounds: 60, characters: [mine, theirs] };
+    G.match = G.tut ? G.tut.makeMatch(ArenaMatch, args) : new ArenaMatch(args);
     buildArena();
     one('#log').innerHTML = '';
     const result = await G.match.run().catch(e => { console.error(e); return { winner: null, endReason: 'error: ' + e.message }; });
@@ -3272,13 +3648,15 @@ const BOT_ROSTER = [{"id":55,"name":"Bot56","moves":"blockHeavy","chainStyle":"l
     await playEvents();
     if (G.token !== token || !one('#arena')) return;
     showEnd(result);
+    if (G.tut) G.tut.ended(result);      // the tutorial: its last lessons and the way on
   }
 
   /* ---------------- answering the engine ---------------- */
   async function ask(p, d) {
     const token = G.token;
-    if (p === 1) {                                   // the computer: a tournament bot
-      const tries = botAnswer(G.bot, G.match, 1, d, Math.random);
+    if (p === 1) {                                   // the computer: a tournament bot (in the tutorial, the sparring partner's script first)
+      const scripted = G.tut && G.tut.answer(d);
+      const tries = (scripted ? [scripted] : []).concat(botAnswer(G.bot, G.match, 1, d, Math.random));
       for (const t of tries) { const r = d.parse(t); if (r.ok) { if (d.kind === 'duel' && r.value.type === 'move') G.lastMoves[1] = r.value.key; return { ...r, action: t }; } }
       for (const t of d.legal) { const r = d.parse(t.split(/\s{2,}|\s+\(/)[0]); if (r.ok) return { ...r, action: t }; }
       throw new Error(`the computer had no legal answer for ${d.kind}`);
@@ -3747,9 +4125,9 @@ const BOT_ROSTER = [{"id":55,"name":"Bot56","moves":"blockHeavy","chainStyle":"l
       <div class="track" id="track">${STEPS.map(s => `<span>${s}</span>`).join('')}</div>
       <div class="goal" id="goal" tabindex="0" role="status" aria-label="Your goal"></div>
       <div class="panel gp" id="g0"></div><div class="panel gp" id="g1"></div>
-      ${[0, 1].map(p => `<div class="fighter ${p ? 'r' : 'l'}" id="f${p}">${ART[G.chars[p]].standing.length ? '' : `<span class="ph">${esc(CHARACTERS[G.chars[p]].name)} · art coming</span>`}<i class="shadowdisc"></i>
+      ${[0, 1].map(p => `<div class="fighter ${p ? 'r' : 'l'}" id="f${p}">${ART[G.chars[p]].standing.length ? '' : `<span class="ph">${esc(charName(p))} · art coming</span>`}<i class="shadowdisc"></i>
         <div class="sprite"><div class="mover"></div></div>
-        <div class="plate"><span>${esc(CHARACTERS[G.chars[p]].name)}</span>${CHARACTERS[G.chars[p]].forms ? '<span class="formchip"></span>' : ''}<span>${p ? 'computer' : 'you'}</span></div></div>`).join('')}
+        <div class="plate"><span>${esc(charName(p))}</span>${CHARACTERS[G.chars[p]].forms ? '<span class="formchip"></span>' : ''}<span>${p ? 'computer' : 'you'}</span></div></div>`).join('')}
       <div class="table" id="t0"></div><div class="table" id="t1"></div><div class="thand" id="th" role="img"></div>
       <div class="reveal" id="reveal"></div>
       <div class="turn" id="turn">▼ Your turn</div>
@@ -3891,7 +4269,7 @@ const BOT_ROSTER = [{"id":55,"name":"Bot56","moves":"blockHeavy","chainStyle":"l
     one('#round').textContent = `Round ${v.round}`;
     const glide = speed > 0 && !G.skip && !stillMotion();
     [0, 1].forEach(p => {
-      const me = p === 0, k = v.chars[p], name = CHARACTERS[k].name, disc = v.discard[p];
+      const me = p === 0, k = v.chars[p], name = charName(p), disc = v.discard[p];
       const form = formShown(p); if (form && G.fighters) G.fighters[p].setForm(form);
       // where each bar is right now (even half-way through a move), so the new bars glide on from there
       const was = glide ? all('#g' + p + ' .tube').map(t => { const h = t.getBoundingClientRect().height || 1; return ['.trail', '.fill'].map(s => one(s, t).getBoundingClientRect().height / h * 100); }) : [];
@@ -4022,6 +4400,7 @@ const BOT_ROSTER = [{"id":55,"name":"Bot56","moves":"blockHeavy","chainStyle":"l
     one('#dAct').innerHTML = ''; one('#turn').style.display = 'none'; dropReveal();
     G.preview = null; coachHide();
     all('.chainsign').forEach(x => x.remove());
+    if (G.tut) G.tut.submitted(d, action);
     resolve({ ...r, action });
   }
   function onClick(e) {
@@ -4336,6 +4715,7 @@ const BOT_ROSTER = [{"id":55,"name":"Bot56","moves":"blockHeavy","chainStyle":"l
     const pv = one('.cprev', info); if (pv) { const end = () => pv.offsetTop + pv.offsetHeight + 12 > (parseFloat(info.style.height) || info.clientHeight); for (const z of [.92, .85, .78, .7, .64]) { if (!end()) break; pv.style.zoom = z; } }
     // the first completed chain: its tip comes with the next decision (after the tip that decision may have of its own)
     if (G.recycleTip && !G.coachNow) { if (TIPS.seen.recycle || coach('recycle', G.recycleTip)) G.recycleTip = null; }
+    if (G.tut) G.tut.rendered(pending);      // the tutorial: its lesson for this decision, and the spotlight on what to use
   }
 
   // what a chain will do, for the defend screen
@@ -4553,7 +4933,7 @@ const BOT_ROSTER = [{"id":55,"name":"Bot56","moves":"blockHeavy","chainStyle":"l
   function coach(id, x) {
     const el = one('#coach'); if (!el || !G) return false;
     if (G.coachNow === id) return true;
-    if (!TIPS.on || !(speed > 0) || TIPS.seen[id] || G.coachNow) return false;
+    if (!TIPS.on || !(speed > 0) || TIPS.seen[id] || G.coachNow || G.tut) return false;      // (the tutorial has its own lesson cards)
     const tip = tipText(id, x); if (!tip) return false;
     TIPS.seen[id] = true; saveTips(); G.coachNow = id;
     el.dataset.tip = id; el.hidden = false; el.style.zoom = '';
@@ -4722,7 +5102,7 @@ const BOT_ROSTER = [{"id":55,"name":"Bot56","moves":"blockHeavy","chainStyle":"l
   }
 
   // leave the match in progress, if any (and its sounds)
-  function leaveMatch() { if (G) { G.token = {}; G.skip = true; } pending = null; sfxStop(); coachHide(); }
+  function leaveMatch() { if (G) { G.token = {}; G.skip = true; if (G.tut) { G.tut.stop(); G.tut = null; } } pending = null; sfxStop(); coachHide(); }
 
   // The character screen, used two ways:
   //   pick   : Play. Two rows of tiles (You, Computer), each with its fighter's card; both fighters are picked on the one
@@ -4879,6 +5259,9 @@ const BOT_ROSTER = [{"id":55,"name":"Bot56","moves":"blockHeavy","chainStyle":"l
     one('.cguide', to).focus({ preventScroll: true });
   }
 
+  /* ---------------- the tutorial (game-src/tutorial.js) ---------------- */
+  const TUT = TUTORIAL.create({ one, all, esc, pic, sfx, get G() { return G; }, startMatch, showStart: () => showStart(), showSelect: mode => showSelect(mode) });
+
   /* ---------------- the start page ---------------- */
   // The first screen: the title on the arena stage, two fighters, and three choices. Play opens the character screen to pick
   // the fighters; Characters opens the same screen to browse. Settings opens the Settings box (openSettings).
@@ -4894,8 +5277,9 @@ const BOT_ROSTER = [{"id":55,"name":"Bot56","moves":"blockHeavy","chainStyle":"l
       <div class="stage"><i class="d1"></i><i class="d2"></i><i class="d3"></i><i class="d4"></i><i class="d5"></i></div>
       ${START_ART.map((k, i) => `<div class="sfig ${i ? 'r' : 'l'}"><i class="shadowdisc"></i><div class="sart">${artHtml(k)}</div></div>`).join('')}
       <h2 class="stitle" id="startTitle">1v1 Break</h2>
-      <div class="smenu" role="group" aria-label="Start page">
+      <div class="smenu n4" role="group" aria-label="Start page">
         <button type="button" class="btn main mid sbtn" data-go="play"><b>Play</b><small>Choose the fighters and fight</small></button>
+        <button type="button" class="btn mid sbtn" data-go="tutorial"><b>Tutorial</b><small>Learn in a guided match</small></button>
         <button type="button" class="btn mid sbtn" data-go="chars"><b>Characters</b><small>A guide to each fighter</small></button>
         <button type="button" class="btn mid sbtn" data-go="settings"><b>Settings</b><small>Sound, music and tips</small></button>
       </div>
@@ -4903,17 +5287,19 @@ const BOT_ROSTER = [{"id":55,"name":"Bot56","moves":"blockHeavy","chainStyle":"l
     </div>`;
     all('canvas[data-ph]', frame).forEach(cv => drawPlaceholder(cv, cv.dataset.ph, cv.dataset.form));
     startChoices().forEach(b => {
-      b.onclick = () => { if (b.dataset.go === 'play') showSelect(); else if (b.dataset.go === 'chars') showSelect('browse'); else openSettings(b); };
+      b.onclick = () => { const go = b.dataset.go; if (go === 'play') showSelect(); else if (go === 'tutorial') TUT.start(); else if (go === 'chars') showSelect('browse'); else openSettings(b); };
       b.onmouseenter = () => b.focus({ preventScroll: true });       // one marker: the pointer and the keys move the same one
     });
     startChoices()[0].focus({ preventScroll: true });
+    TUT.offer();       // the first time the game opens on this device: the tutorial is offered (only once)
     ROSTER.forEach(loadArt);       // the other fighters' art loads behind the start page, so Play opens at once
   }
   // keys: on the start page ↑ ↓ move between the choices (Enter or Space presses the one in focus, as for any button)
   // the character screen has its own keys (selectKey)
   function onKey(e) {
     if (e.altKey || e.ctrlKey || e.metaKey) return;
-    if (one('#settings')) { if (e.key === 'Escape') { e.preventDefault(); sfx('button'); closeSettings(); } return; }       // the Settings box: Esc closes it; its own controls take the other keys
+    if (one('#settings')) { if (e.key === 'Escape') { e.preventDefault(); sfx('button'); closeSettings(); } return; }
+    if (one('#tutOffer')) { if (e.key === 'Escape') { e.preventDefault(); sfx('button'); one('#tutNo').click(); } return; }       // the tutorial offer: Esc is Skip       // the Settings box: Esc closes it; its own controls take the other keys
     if (screen === 'select' && one('.select')) { selectKey(e); return; }
     if (screen !== 'start' || !one('#start')) return;
     const at = document.activeElement;
@@ -4972,6 +5358,8 @@ const BOT_ROSTER = [{"id":55,"name":"Bot56","moves":"blockHeavy","chainStyle":"l
     // for checking the sounds: ARENA.sound.record() starts a list of every sound that starts (id, time), ARENA.sound.log reads it
     sound: { sfx, announce, stop: sfxStop, record(on = true) { SND.log = on ? [] : null; }, get log() { return SND.log; }, get on() { return SND.on; }, get volume() { return SND.vol; }, get ctx() { return SND.ctx; }, ids: HAVE_SFX ? Object.keys(SFX.SOUNDS) : [] },
     scenes: { breakScene, stopScene, formScene, showRoll, recycleScene },      // for checking a scene on its own
+    // the tutorial (for checking): start() begins it, step / beat say where it is, offer(true) shows the first-launch offer again
+    tutorial: { start: () => TUT.start(), skip: () => TUT.skip(), offer: force => TUT.offer(force), get step() { return TUT.step; }, get beat() { return TUT.beat; }, get seen() { return TUT.seen; }, get done() { return TUT.done; }, targets: () => TUT.targets(), forget: () => TUT.forget(), lessons: TUT.LESSONS },
     // for the UI checks (tests/ui-checks.html): read-only helpers, plus a way to start a match and to ask the engine again for
     // the duel decision after a check has set the match up (hand, bars, deck) the way it needs
     test: {
